@@ -14,7 +14,8 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Tutorials](#tutorials)
 - [Games](#games)
 - [Clocks](#clocks)
-
+- [Contributing](#i-want-to-contribute)
+- [License](#license)
   
 ### Code Examples
 - [Offical Presto Repo](https://github.com/pimoroni/presto)
@@ -29,3 +30,18 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 ### Clocks
 - [Fish Tank Clock](https://github.com/arturo182/presto-examples/tree/main/fish_tank)
 - [Word Clock Extra](https://github.com/arturo182/presto-examples/tree/main/word_clock_extra)
+
+
+### I want to contribute!
+
+Great! :smiley:
+
+Please, read the [contribution guidelines](CONTRIBUTING.md) first.
+
+### License
+
+[![CC0](https://i.creativecommons.org/p/zero/1.0/88x31.png)](https://creativecommons.org/publicdomain/zero/1.0/)
+
+To the extent possible under law I have waived all copyright and related or neighboring rights to this work.
+
+See [LICENSE](LICENSE) for more information.
