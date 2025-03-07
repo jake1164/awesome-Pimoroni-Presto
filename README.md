@@ -21,7 +21,7 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
   
 ### Code Examples
 - [Offical Presto Repo](https://github.com/pimoroni/presto)
-- [Cached Examples[(https://github.com/AndrewCapon/presto-cached-examples)
+- [Cached Examples](https://github.com/AndrewCapon/presto-cached-examples)
 
   
 ### Tutorials
