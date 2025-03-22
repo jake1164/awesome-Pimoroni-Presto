@@ -16,6 +16,7 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Clocks](#clocks)
 - [Weather Stations](#weather-stations)
 - [Operating Systems "OS"](#operating-systems)
+- [Other Projects](#other)
 - [Contributing](#i-want-to-contribute)
 - [License](#license)
   
@@ -25,8 +26,11 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 
   
 ### Tutorials
+- [Wifi api Demo](https://forums.pimoroni.com/t/presto-wifi-demo/26947)
+- [Touchscreen Demo](https://forums.pimoroni.com/t/presto-touch-screen-demo/26915)
+- [Explorer Demo](https://forums.pimoroni.com/t/pimoroni-explorer-kit-tutorial/26501/4)
 
-
+  
 ### Games
 
 
@@ -41,7 +45,10 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 ### Operating Systems
 - [TmOS](https://github.com/themissingcow/pimoroni-presto-tmos)
 
-  
+### Other
+- [Desktop Companion](https://git.hack-hro.de/kmohrf/compresto)
+
+
 ### I want to contribute!
 
 Great! :smiley:
