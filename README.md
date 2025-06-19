@@ -52,6 +52,9 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Desktop Companion](https://git.hack-hro.de/kmohrf/compresto)
 - [last.fm playing](https://github.com/andypiper/presto-lastfm)
 - [PrestoDock - Spotify music controller](https://github.com/fatihak/PrestoDeck)
+- [prestohoho - Joke display](https://github.com/mrglennjones/prestohoho)
+- [MQTT display](https://github.com/digitalurban/Presto_MQTT_Display)
+- [AI Image Gallery](https://github.com/mrglennjones/pimoroni-presto-AI-image-gallery)
 
 
 ### I want to contribute!
