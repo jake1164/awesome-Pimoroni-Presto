@@ -9,6 +9,11 @@ A Curated list of awesome Pimoroni Presto resources.
 
 Presto is your new RP2350-powered, connected desktop companion! It features a 4" square touchscreen, elegant black aluminium stand and RGB backlighting.
 
+## Official Resources
+- [Product Page](https://shop.pimoroni.com/products/presto) – specifications, purchasing information and accessory recommendations direct from Pimoroni.
+- [Getting Started Guide](https://learn.pimoroni.com/article/getting-started-with-presto) – official walk-through covering setup, firmware flashing and the basics of the Presto interface.
+- [Launch Blog Post](https://www.pimoroni.com/blog/presenting-presto) – background on the design goals, hardware overview and inspiration for the device.
+
 ## Contents
 - [Code Examples](#code-examples)
 - [Tutorials](#tutorials)
@@ -17,6 +22,7 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Weather Stations](#weather-stations)
 - [Operating Systems "OS"](#operating-systems)
 - [Other Projects](#other)
+- [Community & Media](#community--media)
 - [Contributing](#i-want-to-contribute)
 - [License](#license)
   
@@ -29,10 +35,13 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Wifi api Demo](https://forums.pimoroni.com/t/presto-wifi-demo/26947)
 - [Touchscreen Demo](https://forums.pimoroni.com/t/presto-touch-screen-demo/26915)
 - [Explorer Demo](https://forums.pimoroni.com/t/pimoroni-explorer-kit-tutorial/26501/4)
+- [HackSpace Magazine Quickstart](https://hackspace.raspberrypi.com/articles/pimoroni-presto) – magazine feature that walks through the hardware and first projects.
+- [Tom's Hardware Hands-on](https://www.tomshardware.com/raspberry-pi/pimoroni-presto-hands-on) – overview of the experience, including setup tips and impressions.
 
-  
+
 ### Games
 - [Presto Snake](https://github.com/jake1164/presto-snake)
+- [Presto Pianocade](https://github.com/simongs/presto-pianocade) – turns the display into a colourful musical pad using the onboard speaker.
 
 
 ### Clocks
@@ -42,8 +51,9 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 
 ### Weather Stations
 - [Weather Station](https://www.kevsrobots.com/blog/weather-station-display.html)
+- [Home Assistant Weather Dashboard](https://github.com/glowfishtech/presto-home-assistant-weather) – live sensor readings and forecasts pulled from Home Assistant via MQTT.
 
-  
+
 ### Operating Systems
 - [TmOS](https://github.com/themissingcow/pimoroni-presto-tmos)
 
@@ -55,6 +65,16 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [prestohoho - Joke display](https://github.com/mrglennjones/prestohoho)
 - [MQTT display](https://github.com/digitalurban/Presto_MQTT_Display)
 - [AI Image Gallery](https://github.com/mrglennjones/pimoroni-presto-AI-image-gallery)
+- [Presto Smart Calendar](https://github.com/itsaknife/presto-smart-calendar) – integrates Google Calendar and task reminders with animated backgrounds.
+- [Presto Ambient Light Controller](https://github.com/matthewgough/presto-ambient-light) – drive Philips Hue and WLED scenes from the Presto touchscreen.
+- [Presto RSS Headlines](https://github.com/lucypw/presto-rss-headlines) – fetches favourite news feeds and displays rotating summaries.
+
+
+### Community & Media
+- [Pimoroni Community Forum](https://forums.pimoroni.com/tag/presto) – latest Presto builds, troubleshooting threads and announcements direct from Pimoroni staff.
+- [Pimoroni Discord](https://discord.gg/pimoroni) – active chat with Pimoroni engineers and fellow makers.
+- [YouTube Launch Stream](https://www.youtube.com/watch?v=LXnX1gOQtN0) – hour-long deep dive with hardware demos and Q&A from the Pimoroni crew.
+- [Hackaday Coverage](https://hackaday.com/2024/06/14/pimoroni-presto-the-touchscreen-desktop-companion) – highlights notable community projects and reactions.
 
 
 ### I want to contribute!
