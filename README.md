@@ -17,7 +17,6 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 ## Contents
 - [Code Examples](#code-examples)
 - [Tutorials](#tutorials)
-- [Community & Media](#community--media)
 - [Games](#games)
 - [Clocks](#clocks)
 - [Weather Stations](#weather-stations)
@@ -27,11 +26,9 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Contributing](#i-want-to-contribute)
 - [License](#license)
   
-
 ### Code Examples
 - [Offical Presto Repo](https://github.com/pimoroni/presto)
 - [Cached Examples](https://github.com/AndrewCapon/presto-cached-examples)
-- [Presto C++ Boilerplate](https://github.com/pimoroni/pimoroni-pico/tree/main/examples/presto) ![NEW](badges/new.svg) – minimal C++ starter for RP2350/Presto apps.
 
   
 ### Tutorials
@@ -50,8 +47,6 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 ### Clocks
 - [Fish Tank Clock](https://github.com/arturo182/presto-examples/tree/main/fish_tank)
 - [Word Clock Extra](https://github.com/arturo182/presto-examples/tree/main/word_clock_extra)
-- [Retro Flip Clock + 3D-printed frame](https://forums.pimoroni.com/t/retro-style-flip-clock-for-presto-with-3d-printed-frame/26791) ![NEW](badges/new.svg)
-
 
 
 ### Weather Stations
