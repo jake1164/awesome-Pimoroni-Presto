@@ -28,7 +28,7 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [License](#license)
   
 ### Code Examples
-- [Offical Presto Repo](https://github.com/pimoroni/presto)
+- [Official Presto Repo](https://github.com/pimoroni/presto)
 - [Cached Examples](https://github.com/AndrewCapon/presto-cached-examples)
 - [Presto C++ Boilerplate](https://github.com/pimoroni/pimoroni-pico/tree/main/examples/presto) ![NEW](badges/new.svg) – minimal C++ starter for RP2350/Presto apps.
 
