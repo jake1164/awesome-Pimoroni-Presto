@@ -13,11 +13,11 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Product Page](https://shop.pimoroni.com/products/presto) – specifications, purchasing information and accessory recommendations direct from Pimoroni.
 - [Getting Started Guide](https://learn.pimoroni.com/article/getting-started-with-presto) – official walk-through covering setup, firmware flashing and the basics of the Presto interface.
 - [Launch Blog Post](https://www.pimoroni.com/blog/presenting-presto) – background on the design goals, hardware overview and inspiration for the device.
+- [GitHub Releases & Firmware](https://github.com/pimoroni/presto/releases) ![NEW](badges/new.svg) – latest MicroPython builds (incl. "with-filesystem") and example updates.
 
 ## Contents
 - [Code Examples](#code-examples)
 - [Tutorials](#tutorials)
-- [Community & Media](#community--media)
 - [Games](#games)
 - [Clocks](#clocks)
 - [Weather Stations](#weather-stations)
@@ -27,7 +27,6 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Contributing](#i-want-to-contribute)
 - [License](#license)
   
-
 ### Code Examples
 - [Offical Presto Repo](https://github.com/pimoroni/presto)
 - [Cached Examples](https://github.com/AndrewCapon/presto-cached-examples)
@@ -53,7 +52,6 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Retro Flip Clock + 3D-printed frame](https://forums.pimoroni.com/t/retro-style-flip-clock-for-presto-with-3d-printed-frame/26791) ![NEW](badges/new.svg)
 
 
-
 ### Weather Stations
 - [Weather Station](https://www.kevsrobots.com/blog/weather-station-display.html)
 - [Home Assistant Weather Dashboard](https://github.com/glowfishtech/presto-home-assistant-weather) – live sensor readings and forecasts pulled from Home Assistant via MQTT.
@@ -73,6 +71,12 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Presto Smart Calendar](https://github.com/itsaknife/presto-smart-calendar) – integrates Google Calendar and task reminders with animated backgrounds.
 - [Presto Ambient Light Controller](https://github.com/matthewgough/presto-ambient-light) – drive Philips Hue and WLED scenes from the Presto touchscreen.
 - [Presto RSS Headlines](https://github.com/lucypw/presto-rss-headlines) – fetches favourite news feeds and displays rotating summaries.
+- [WiiM "What’s Playing" display](https://forums.pimoroni.com/t/wiim-now-playing-on-presto/26123) ![NEW](badges/new.svg) – album art & metadata from WiiM streamers.
+- [Presto Stream Deck Controller](https://forums.pimoroni.com/t/stream-deck-style-controller-for-presto/26380) ![NEW](badges/new.svg) – touch button deck; maps presses to actions.
+- [Presto Maze](https://github.com/kurosuke/PrestoMaze) ![NEW](badges/new.svg) – interactive maze/pathfinding demo with touch input.
+- [X‑Plane 12 Attitude Indicator](https://github.com/PaulskPt/Presto_attitude_indicator_for_X-Plane12) ![NEW](badges/new.svg) – horizon instrument fed from a flight sim.
+- [Solar System demo](https://github.com/mrglennjones/presto-solar-system) ![NEW](badges/new.svg) – animated planets and orbits.
+- [Presto‑Cal (TZ/DST + iCal agenda)](https://github.com/dan-parker/Presto-Cal) ![NEW](badges/new.svg) – timezone helpers and iCal agenda app for Presto.
 
 
 ### Community & Media
@@ -80,6 +84,7 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Pimoroni Discord](https://discord.gg/pimoroni) – active chat with Pimoroni engineers and fellow makers.
 - [YouTube Launch Stream](https://www.youtube.com/watch?v=LXnX1gOQtN0) – hour-long deep dive with hardware demos and Q&A from the Pimoroni crew.
 - [Hackaday Coverage](https://hackaday.com/2024/06/14/pimoroni-presto-the-touchscreen-desktop-companion) – highlights notable community projects and reactions.
+- [PrestoDeck on Hackster](https://www.hackster.io/fatih_ak/presto-deck-turn-your-presto-into-a-spotify-music-player-40a1b0) ![NEW](badges/new.svg) – write-up with build details and video.
 
 
 ### I want to contribute!
