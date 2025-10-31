@@ -18,15 +18,16 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 ## Contents
 - [Code Examples](#code-examples)
 - [Tutorials](#tutorials)
+- [Community & Media](#community--media)
 - [Games](#games)
 - [Clocks](#clocks)
 - [Weather Stations](#weather-stations)
 - [Operating Systems "OS"](#operating-systems)
 - [Other Projects](#other)
-- [Community & Media](#community--media)
 - [Contributing](#i-want-to-contribute)
 - [License](#license)
   
+
 ### Code Examples
 - [Offical Presto Repo](https://github.com/pimoroni/presto)
 - [Cached Examples](https://github.com/AndrewCapon/presto-cached-examples)
@@ -38,7 +39,15 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Touchscreen Demo](https://forums.pimoroni.com/t/presto-touch-screen-demo/26915)
 - [Explorer Demo](https://forums.pimoroni.com/t/pimoroni-explorer-kit-tutorial/26501/4)
 - [HackSpace Magazine Quickstart](https://hackspace.raspberrypi.com/articles/pimoroni-presto) – magazine feature that walks through the hardware and first projects.
+
+
+### Community & Media
+- [Pimoroni Community Forum](https://forums.pimoroni.com/tag/presto) – latest Presto builds, troubleshooting threads and announcements direct from Pimoroni staff.
+- [Pimoroni Discord](https://discord.gg/pimoroni) – active chat with Pimoroni engineers and fellow makers.
+- [YouTube Launch Stream](https://www.youtube.com/watch?v=LXnX1gOQtN0) – hour-long deep dive with hardware demos and Q&A from the Pimoroni crew.
+- [Hackaday Coverage](https://hackaday.com/2024/06/14/pimoroni-presto-the-touchscreen-desktop-companion) – highlights notable community projects and reactions.
 - [Tom's Hardware Hands-on](https://www.tomshardware.com/raspberry-pi/pimoroni-presto-hands-on) – overview of the experience, including setup tips and impressions.
+- [PrestoDeck on Hackster](https://www.hackster.io/fatih_ak/presto-deck-turn-your-presto-into-a-spotify-music-player-40a1b0) ![NEW](badges/new.svg) – write-up with build details and video.
 
 
 ### Games
@@ -77,14 +86,6 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [X‑Plane 12 Attitude Indicator](https://github.com/PaulskPt/Presto_attitude_indicator_for_X-Plane12) ![NEW](badges/new.svg) – horizon instrument fed from a flight sim.
 - [Solar System demo](https://github.com/mrglennjones/presto-solar-system) ![NEW](badges/new.svg) – animated planets and orbits.
 - [Presto‑Cal (TZ/DST + iCal agenda)](https://github.com/dan-parker/Presto-Cal) ![NEW](badges/new.svg) – timezone helpers and iCal agenda app for Presto.
-
-
-### Community & Media
-- [Pimoroni Community Forum](https://forums.pimoroni.com/tag/presto) – latest Presto builds, troubleshooting threads and announcements direct from Pimoroni staff.
-- [Pimoroni Discord](https://discord.gg/pimoroni) – active chat with Pimoroni engineers and fellow makers.
-- [YouTube Launch Stream](https://www.youtube.com/watch?v=LXnX1gOQtN0) – hour-long deep dive with hardware demos and Q&A from the Pimoroni crew.
-- [Hackaday Coverage](https://hackaday.com/2024/06/14/pimoroni-presto-the-touchscreen-desktop-companion) – highlights notable community projects and reactions.
-- [PrestoDeck on Hackster](https://www.hackster.io/fatih_ak/presto-deck-turn-your-presto-into-a-spotify-music-player-40a1b0) ![NEW](badges/new.svg) – write-up with build details and video.
 
 
 ### I want to contribute!
