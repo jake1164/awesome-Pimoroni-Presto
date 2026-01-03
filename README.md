@@ -33,7 +33,6 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 
 - [Official Presto Repo](https://github.com/pimoroni/presto)
 - [Cached Examples](https://github.com/AndrewCapon/presto-cached-examples)
-- [Presto C++ Boilerplate](https://github.com/pimoroni/pimoroni-pico/tree/main/examples/presto) – minimal C++ starter for RP2350/Presto apps.
 - [Presto MQTT Multi-Topic Subscriber (MicroPython)](https://github.com/PaulskPt/Presto_MQTT_multi_topic_subscriber) — subscribes to multiple topics; remote control of ambient LEDs and on‑screen text (v2 adds remote text‑colour control). ![NEW](badges/new.svg)
 - [LMS Controller (Logitech Media Server) for Presto](https://github.com/goodeb/LMS_controller) — full on‑device controller/now‑playing display; well‑documented and reusable timer utilities. ![NEW](badges/new.svg)
 
@@ -81,7 +80,7 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 
 - [Pimoroni Community Forum](https://forums.pimoroni.com) – latest Presto builds, troubleshooting threads and announcements direct from Pimoroni staff.
 - [Pimoroni Discord](https://discord.gg/pimoroni) – active chat with Pimoroni engineers and fellow makers.
-- [PrestoDeck on Hackster](https://www.hackster.io/fatih_ak/presto-deck-turn-your-presto-into-a-spotify-music-player-40a1b0) – write-up with build details and video.
+- [PrestoDeck on Hackster](https://www.hackster.io/news/fatih-ak-turns-pimoroni-s-presto-into-a-slick-spotify-media-controller-the-prestodeck-687119f2c456) – write-up with build details and video.
 - [Building a MicroPython Weather Station on Presto — Kevin McAleer (YouTube)](https://www.classcentral.com/course/youtube-is-pimoroni-presto-the-best-micropython-touchscreen-432181) — hands-on tutorial covering touch UI, charts, and live data. ![RECENT](badges/recent.svg)
 
 ### I want to contribute!
