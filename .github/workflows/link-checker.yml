@@ -1,0 +1,73 @@
+name: Link Checker
+
+# Run weekly on Mondays at 9:00 AM UTC, manually via workflow_dispatch, and on pull requests
+on:
+  schedule:
+    # Run every Monday at 9:00 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '**.md'
+      - '.github/workflows/link-checker.yml'
+
+jobs:
+  link-checker:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check links with Lychee
+        uses: lycheeverse/lychee-action@v1
+        with:
+          # Check all markdown files in the repository
+          # Configuration is loaded from .lycherc.toml
+          args: --verbose --no-progress '**.md'
+          # Fail the action on broken links
+          fail: true
+        env:
+          # Use GitHub token to avoid rate limiting on GitHub links
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Create Issue on Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '🔗 Broken Links Detected';
+            const body = `The automated link checker has found broken links in the repository.
+            
+            **Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            Please review the workflow logs above to see which links are broken and fix them.
+            
+            This issue was automatically created by the link-checker workflow.`;
+            
+            // Check if there's already an open issue about broken links
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'broken-links'
+            });
+            
+            if (issues.data.length === 0) {
+              // Create a new issue if none exists
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['broken-links', 'automated']
+              });
+            } else {
+              // Comment on the existing issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues.data[0].number,
+                body: `🔗 Broken links detected again!\n\n**Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\nPlease check the latest run for details.`
+              });
+            }
