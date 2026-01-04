@@ -29,7 +29,7 @@ jobs:
           fail: true
         env:
           # Use GitHub token to avoid rate limiting on GitHub links
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Issue on Failure
         if: failure()
@@ -37,9 +37,10 @@ jobs:
         with:
           script: |
             const title = '🔗 Broken Links Detected';
+            const workflowUrl = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
             const body = `The automated link checker has found broken links in the repository.
             
-            **Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            **Workflow Run:** ${workflowUrl}
             
             Please review the workflow logs above to see which links are broken and fix them.
             
@@ -68,6 +69,6 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issues.data[0].number,
-                body: `🔗 Broken links detected again!\n\n**Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\nPlease check the latest run for details.`
+                body: `🔗 Broken links detected again!\n\n**Workflow Run:** ${workflowUrl}\n\nPlease check the latest run for details.`
               });
             }
