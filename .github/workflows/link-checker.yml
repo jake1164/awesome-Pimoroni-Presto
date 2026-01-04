@@ -15,6 +15,10 @@ jobs:
   link-checker:
     runs-on: ubuntu-latest
     
+    permissions:
+      contents: read      # Required to checkout the repository
+      issues: write       # Required to create/update issues on link failures
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
