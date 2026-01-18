@@ -26,19 +26,17 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 ### Official Resources
 
 - [Product Page](https://shop.pimoroni.com/products/presto) – specifications, purchasing information and accessory recommendations direct from Pimoroni.
-- [Getting Started Guide](https://learn.pimoroni.com/article/getting-started-with-presto) – official walk-through covering setup, firmware flashing and the basics of the Presto interface; see the Touch & Vector Fonts section for button-handling and vector-font snippets. ![RECENT](badges/recent.svg)
+- [Getting Started Guide](https://learn.pimoroni.com/article/getting-started-with-presto) – official walk-through covering setup, firmware flashing and the basics of the Presto interface; see the Touch & Vector Fonts section for button-handling and vector-font snippets.
 - [GitHub Releases & Firmware](https://github.com/pimoroni/presto/releases) – latest MicroPython builds (incl. "with-filesystem") and example updates.
 
 ### Code Examples
 
 - [Official Presto Repo](https://github.com/pimoroni/presto)
 - [Cached Examples](https://github.com/AndrewCapon/presto-cached-examples)
-- [Presto MQTT Multi-Topic Subscriber (MicroPython)](https://github.com/PaulskPt/Presto_MQTT_multi_topic_subscriber) — subscribes to multiple topics; remote control of ambient LEDs and on‑screen text (v2 adds remote text‑colour control). ![NEW](badges/new.svg)
-- [LMS Controller (Logitech Media Server) for Presto](https://github.com/goodeb/LMS_controller) — full on‑device controller/now‑playing display; well‑documented and reusable timer utilities. ![NEW](badges/new.svg)
 
 ### Tutorials
 
-- [Presto Development Workflow (VS Code + mpremote/MicroPico)](https://forums.pimoroni.com/t/presto-development-workflow/28105) — tips for a faster edit–run loop and deploying from VS Code instead of Thonny. ![RECENT](badges/recent.svg)
+- [Presto Development Workflow (VS Code + mpremote/MicroPico)](https://forums.pimoroni.com/t/presto-development-workflow/28105) — tips for a faster edit–run loop and deploying from VS Code instead of Thonny.
 - [Wi-Fi API Demo](https://forums.pimoroni.com/t/presto-wifi-demo/26947)
 - [Touchscreen Demo](https://forums.pimoroni.com/t/presto-touch-screen-demo/26915)
 - [Explorer Demo](https://forums.pimoroni.com/t/pimoroni-explorer-kit-tutorial/26501/4)
@@ -51,7 +49,7 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 
 - [Fish Tank Clock](https://github.com/arturo182/presto-examples/tree/main/fish_tank)
 - [Word Clock Extra](https://github.com/arturo182/presto-examples/tree/main/word_clock_extra)
-- [Presto Flip Clock](https://gist.github.com/cvuorinen/96e4934e1d681a5cfd7333c49fcd0f90) — clean split‑flap style clock; good reference for vector text + animation pacing. ![NEW](badges/new.svg)
+- [Presto Flip Clock](https://gist.github.com/cvuorinen/96e4934e1d681a5cfd7333c49fcd0f90) — clean split‑flap style clock; good reference for vector text + animation pacing. ![RECENT](badges/recent.svg)
 
 ### Weather Stations
 
@@ -74,14 +72,22 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Presto Maze](https://github.com/kurosuke/PrestoMaze) – interactive maze/pathfinding demo with touch input.
 - [X‑Plane 12 Attitude Indicator](https://github.com/PaulskPt/Presto_attitude_indicator_for_X-Plane12) – horizon instrument fed from a flight sim.
 - [Solar System demo](https://github.com/mrglennjones/presto-solar-system) – animated planets and orbits.
-- [Presto‑Cal (TZ/DST + iCal agenda)](https://github.com/dan-parker/Presto-Cal) – timezone helpers and iCal agenda app for Presto.
+- 🆕 **Presto MQTT Multi-Topic Subscriber** — MicroPython app that subscribes Presto to multiple MQTT topics (sensor telemetry, LED color/brightness commands, etc.); includes clear setup, secrets template, and publisher examples.  
+  https://github.com/PaulskPt/Presto_MQTT_multi_topic_subscriber ![NEW](badges/new.svg)
+
+- 🆕 **LMS Controller (Logitech Media Server)** — Full now-playing + transport control surface for a Squeezebox/Logitech Media Server setup, tailored UI for the 480×480 display.  
+  Forum overview: https://forums.pimoroni.com/t/presto-music-system-display-controller-lms/28218  
+  Repo: https://github.com/goodeb/LMS_controller ![NEW](badges/new.svg)
+
+- [Presto‑Cal (iCal + Timezone/DST)](https://github.com/dan-parker/Presto-Cal) — Calendar viewer with iCalendar parsing and a custom timezone/DST lib designed for Presto’s constraints; forum post includes screenshots and GitHub link.  
+  Forum: https://forums.pimoroni.com/t/micropython-timezone-and-dst-library/28318 ![NEW](badges/new.svg)
 
 ### Community & Media
 
 - [Pimoroni Community Forum](https://forums.pimoroni.com) – latest Presto builds, troubleshooting threads and announcements direct from Pimoroni staff.
 - [Pimoroni Discord](https://discord.gg/pimoroni) – active chat with Pimoroni engineers and fellow makers.
 - [PrestoDeck on Hackster](https://www.hackster.io/news/fatih-ak-turns-pimoroni-s-presto-into-a-slick-spotify-media-controller-the-prestodeck-687119f2c456) – write-up with build details and video.
-- [Building a MicroPython Weather Station on Presto — Kevin McAleer (YouTube)](https://www.classcentral.com/course/youtube-is-pimoroni-presto-the-best-micropython-touchscreen-432181) — hands-on tutorial covering touch UI, charts, and live data. ![RECENT](badges/recent.svg)
+- [Building a MicroPython Weather Station on Presto — Kevin McAleer (YouTube)](https://www.classcentral.com/course/youtube-is-pimoroni-presto-the-best-micropython-touchscreen-432181) — hands-on tutorial covering touch UI, charts, and live data.
 
 ### I want to contribute!
 
