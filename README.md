@@ -50,7 +50,8 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Fish Tank Clock](https://github.com/arturo182/presto-examples/tree/main/fish_tank)
 - [Word Clock Extra](https://github.com/arturo182/presto-examples/tree/main/word_clock_extra)
 - [Presto Flip Clock](https://gist.github.com/cvuorinen/96e4934e1d681a5cfd7333c49fcd0f90) — clean split‑flap style clock; good reference for vector text + animation pacing. ![RECENT](badges/recent.svg)
-
+- [Masterclock lookalike](https://github.com/burne-code/presto-ledclock)
+  
 ### Weather Stations
 
 - [Weather Station](https://www.kevsrobots.com/blog/weather-station-display.html)
