@@ -13,6 +13,7 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 
 - [Official Resources](#official-resources)
 - [Code Examples](#code-examples)
+- [Development Tools](#development-tools)
 - [Tutorials](#tutorials)
 - [Games](#games)
 - [Clocks](#clocks)
@@ -33,9 +34,17 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 
 - [Official Presto Repo](https://github.com/pimoroni/presto)
 - [Cached Examples](https://github.com/AndrewCapon/presto-cached-examples)
+- [Home Assistant WebSocket Light Control](https://github.com/pimoroni/presto/tree/main/examples/home_assistant) — official example that syncs a light's state with Home Assistant over WebSocket and toggles it from the touchscreen. ![NEW](badges/new.svg)
+- [SCD41 CO₂ Monitor](https://github.com/pimoroni/presto/blob/main/examples/co2.py) — official example plotting CO₂, temperature and humidity history with min/max readings and rear LEDs coloured by CO₂ level; requires an SCD41 breakout. ![NEW](badges/new.svg)
+
+### Development Tools
+
+- [Pimoroni Emulator](https://github.com/iksaif/pimoroni-emu) — unofficial desktop emulator with simulated Presto graphics and mouse-as-touch, plus headless testing and screenshot capture. ![NEW](badges/new.svg)
+- [Embedded Swift Presto Firmware](https://github.com/velocityzen/Presto) — Swift firmware/BSP with SwiftUI-inspired views, Pico SDK UF2 build and host-side UI tests. ![NEW](badges/new.svg)
 
 ### Tutorials
 
+- [Get the Latest News with Presto](https://learn.pimoroni.com/article/build-a-presto-newsfeed-app) — official Pimoroni Learn tutorial (29 May 2026) for a Wi-Fi RSS news reader with MicroPython, PicoVector and QR codes. ![NEW](badges/new.svg)
 - [Presto Development Workflow (VS Code + mpremote/MicroPico)](https://forums.pimoroni.com/t/presto-development-workflow/28105) — tips for a faster edit–run loop and deploying from VS Code instead of Thonny.
 - [Wi-Fi API Demo](https://forums.pimoroni.com/t/presto-wifi-demo/26947)
 - [Touchscreen Demo](https://forums.pimoroni.com/t/presto-touch-screen-demo/26915)
@@ -49,7 +58,7 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 
 - [Fish Tank Clock](https://github.com/arturo182/presto-examples/tree/main/fish_tank)
 - [Word Clock Extra](https://github.com/arturo182/presto-examples/tree/main/word_clock_extra)
-- [Presto Flip Clock](https://gist.github.com/cvuorinen/96e4934e1d681a5cfd7333c49fcd0f90) — clean split‑flap style clock; good reference for vector text + animation pacing. ![RECENT](badges/recent.svg)
+- [Presto Flip Clock](https://gist.github.com/cvuorinen/96e4934e1d681a5cfd7333c49fcd0f90) — clean split‑flap style clock; good reference for vector text + animation pacing.
 - [Masterclock lookalike](https://github.com/burne-code/presto-ledclock)
   
 ### Weather Stations
@@ -73,15 +82,15 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Presto Maze](https://github.com/kurosuke/PrestoMaze) – interactive maze/pathfinding demo with touch input.
 - [X‑Plane 12 Attitude Indicator](https://github.com/PaulskPt/Presto_attitude_indicator_for_X-Plane12) – horizon instrument fed from a flight sim.
 - [Solar System demo](https://github.com/mrglennjones/presto-solar-system) – animated planets and orbits.
-- 🆕 **Presto MQTT Multi-Topic Subscriber** — MicroPython app that subscribes Presto to multiple MQTT topics (sensor telemetry, LED color/brightness commands, etc.); includes clear setup, secrets template, and publisher examples.  
-  https://github.com/PaulskPt/Presto_MQTT_multi_topic_subscriber ![NEW](badges/new.svg)
-
-- 🆕 **LMS Controller (Logitech Media Server)** — Full now-playing + transport control surface for a Squeezebox/Logitech Media Server setup, tailored UI for the 480×480 display.  
-  Forum overview: https://forums.pimoroni.com/t/presto-music-system-display-controller-lms/28218  
-  Repo: https://github.com/goodeb/LMS_controller ![NEW](badges/new.svg)
-
-- [Presto‑Cal (iCal + Timezone/DST)](https://github.com/dan-parker/Presto-Cal) — Calendar viewer with iCalendar parsing and a custom timezone/DST lib designed for Presto’s constraints; forum post includes screenshots and GitHub link.  
-  Forum: https://forums.pimoroni.com/t/micropython-timezone-and-dst-library/28318 ![NEW](badges/new.svg)
+- [Presto MQTT Multi-Topic Subscriber](https://github.com/PaulskPt/Presto_MQTT_multi_topic_subscriber) — MicroPython app subscribing to multiple MQTT topics for sensor telemetry and remote LED/colour commands, with publisher examples. ![RECENT](badges/recent.svg)
+- [LMS Controller (Logitech Media Server)](https://github.com/goodeb/LMS_controller) — now-playing display and touchscreen transport controller for a Lyrion/Logitech Media Server ([forum overview](https://forums.pimoroni.com/t/presto-music-system-display-controller/28312)). ![RECENT](badges/recent.svg)
+- [Presto-Cal (iCalendar + Timezone/DST)](https://github.com/dan-parker/Presto-Cal) — iCalendar viewer with MicroPython timezone and daylight-saving-time handling ([forum post](https://forums.pimoroni.com/t/micropython-timezone-and-dst-library/28318)). ![RECENT](badges/recent.svg)
+- [MacStatP — macOS System Monitor](https://github.com/vwillcox/MacStatP) — macOS CPU/GPU, memory, disk, network and process telemetry sent over USB serial to a tappable Presto dashboard. ![NEW](badges/new.svg)
+- [BuddyPresto — Claude Desk Pet](https://github.com/vwillcox/BuddyPresto) — Bluetooth-connected Claude session companion with permission approval/denial, session summaries and LED/buzzer alerts. ![NEW](badges/new.svg)
+- [Presto Immich Slideshow](https://github.com/vwillcox/presto-immich) — displays albums from a self-hosted Immich server as a touchscreen photo frame with web-based configuration. ![NEW](badges/new.svg)
+- [PrestoDeck for Music Assistant](https://github.com/jbslabs/PrestoDeckforMA) — Music Assistant/Home Assistant/MQTT fork of PrestoDeck with multi-provider playback, MQTT discovery and display/LED automation. ![NEW](badges/new.svg)
+- [Presto Cockpit](https://github.com/AEON-7/presto-cockpit) — multi-screen AI/GPU home-lab dashboard for agent activity, GPU/host metrics, uptime, sensors, crypto, news and clocks; optional backend services. ![NEW](badges/new.svg)
+- [Presto Poetry Kiosk](https://github.com/svandragt/presto-poetrykiosk) — MicroPython kiosk shuffling photo-and-poem slides with overlaid text and fade transitions. ![NEW](badges/new.svg)
 
 ### Community & Media
 
