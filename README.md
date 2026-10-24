@@ -7,7 +7,7 @@
 <img src="https://shop.pimoroni.com/cdn/shop/files/presto-9_1500x1500_crop_center.jpg" alt="Pimoroni Presto Back" width="250" height="250">
 </p>
 
-Presto is your new RP2350-powered, connected desktop companion! It features a 4" square touchscreen, elegant black aluminium stand and RGB backlighting.
+Presto is your new RP2350-powered, connected desktop companion! It features a 4" square touchscreen, elegant black aluminium stand and RGB backlighting. ♥ [Support this list](#support-this-project)
 
 ## Contents
 
@@ -104,6 +104,17 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 Great! :smiley:
 
 Please, read the [contribution guidelines](CONTRIBUTING.md) first.
+
+### Support this project
+
+Maintaining and expanding this list takes time. If you've found it useful, giving it a ⭐ star helps other Presto owners discover it.
+
+You can also support ongoing curation and maintenance through GitHub Sponsors or Buy Me a Coffee. Support is entirely optional, and it never affects which projects are listed.
+
+<p align="center">
+  <a href="https://github.com/sponsors/jake1164"><img src="assets/sponsor-github.svg" alt="Support on GitHub Sponsors" height="35"></a>
+  <a href="https://buymeacoffee.com/jake1164s"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me a Coffee" height="35"></a>
+</p>
 
 ### License
 
