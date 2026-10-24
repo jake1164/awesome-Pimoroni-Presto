@@ -1,0 +1,44 @@
+# Lychee link checker configuration
+# See https://github.com/lycheeverse/lychee for all options
+
+# Maximum number of concurrent network requests
+max_concurrency = 10
+
+# Maximum number of retries per link
+max_retries = 3
+
+# Timeout for each request (in seconds)
+timeout = 20
+
+# Accept status codes (200-299 = success, 429 = rate limited but link exists)
+accept = [200, 201, 202, 203, 204, 205, 206, 207, 208, 226, 429]
+
+# User agent string
+user_agent = "Mozilla/5.0 (compatible; LinkChecker/1.0; +https://github.com/jake1164/awesome-Pimoroni-Presto)"
+
+# Exclude certain URLs or patterns that are known to cause issues
+# Examples: login-required sites, geo-restricted content, sites blocking bots
+exclude = [
+    # Exclude any example/placeholder domains
+    'example.com',
+    'localhost',
+    # Add problematic domains here if needed
+]
+
+# Check method
+method = "get"
+
+# Include links from HTML and Markdown files
+include = ['**.md', '**.html']
+
+# Skip checking private/local links
+exclude_all_private = true
+
+# Ignore case when checking links
+ignore_case = false
+
+# Cache successful responses to speed up repeated checks
+cache = true
+
+# Maximum cache age (in seconds) - 1 day
+max_cache_age = 86400
