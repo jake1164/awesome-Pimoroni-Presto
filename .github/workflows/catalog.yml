@@ -1,0 +1,45 @@
+name: README Catalog
+
+# Validates README.md and builds the catalog JSON artifact. It runs on every pull
+# request and every push to main with no path filters, so path filtering cannot
+# leave a required "validate" check pending. (GitHub can still skip runs for other
+# reasons, such as skip-ci commit messages, and a merge queue would also need a
+# `merge_group` trigger.) Other workflows, such as the future site build, must
+# reuse it with `uses: ./.github/workflows/catalog.yml` and depend on it with
+# `needs:`, then download the `presto-catalog` artifact. They must not re-implement
+# or skip these checks.
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      # Generate first so README mistakes surface as line annotations on the pull request.
+      - name: Generate catalog
+        run: python tools/readme_catalog.py --readme README.md --format github --output "$RUNNER_TEMP/presto-catalog/catalog.json"
+      - name: Run catalog tests
+        run: python -m unittest discover -s tests -v
+      # Reached only when generation and the tests both succeeded.
+      - name: Upload generated catalog
+        uses: actions/upload-artifact@v4
+        with:
+          name: presto-catalog
+          path: ${{ runner.temp }}/presto-catalog/catalog.json
+          if-no-files-found: error
+          retention-days: 14

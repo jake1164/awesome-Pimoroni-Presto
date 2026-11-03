@@ -19,10 +19,12 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Clocks](#clocks)
 - [Weather Stations](#weather-stations)
 - [Operating Systems](#operating-systems)
-- [Other Projects](#other)
+- [Other Projects](#other-projects)
 - [Community & Media](#community--media)
 - [Contributing](#i-want-to-contribute)
 - [License](#license)
+
+<!-- catalog:start -->
 
 ### Official Resources
 
@@ -107,6 +109,8 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Pimoroni Discord](https://discord.gg/pimoroni) – active chat with Pimoroni engineers and fellow makers.
 - [PrestoDeck on Hackster](https://www.hackster.io/news/fatih-ak-turns-pimoroni-s-presto-into-a-slick-spotify-media-controller-the-prestodeck-687119f2c456) – write-up with build details and video.
 - [Building a MicroPython Weather Station on Presto — Kevin McAleer (YouTube)](https://www.classcentral.com/course/youtube-is-pimoroni-presto-the-best-micropython-touchscreen-432181) — hands-on tutorial covering touch UI, charts, and live data.
+
+<!-- catalog:end -->
 
 ### I want to contribute!
 

@@ -1,0 +1,20 @@
+{
+  "name": "awesome-pimoroni-presto-gallery",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/build-catalog.mjs && astro dev",
+    "build": "node scripts/build-catalog.mjs && astro build",
+    "preview": "astro preview",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "playwright test",
+    "astro": "astro"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "astro": "^5.14.1"
+  }
+}

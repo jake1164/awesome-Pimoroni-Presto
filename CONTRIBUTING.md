@@ -9,8 +9,26 @@ Thanks for your interest in contributing to **Awesome Pimoroni Presto**!
 4. Keep alphabetical ordering within sections when possible.
 5. Avoid duplicates and dead links.
 
+## README entry format
+`README.md` is the only file you need to edit; the website is generated from it. Everything between the `<!-- catalog:start -->` and `<!-- catalog:end -->` comments is the catalog:
+
+- **Categories** are `### Category name` headings. To add, rename, reorder or remove a category, edit the headings (no code or configuration changes are needed). Add it to the **Contents** list too so it shows up in the README's navigation.
+- **Projects** are single lines directly under their category:
+
+  ```markdown
+  - [Project name](https://example.org/project) — A one-line description with an optional [link](https://example.org/more). ![NEW](badges/new.svg)
+  ```
+
+  - Start with `- [title](URL)`; the URL must be `http` or `https` with a plain ASCII host. Write an internationalized host in its punycode (`xn--`) form; backslashes and invalid `%` escapes are rejected.
+  - The description is optional. It follows an em dash (—), an en dash (–) or a hyphen and a space, stays on the same line, and may contain only plain text and `[text](https://...)` links (no HTML or images).
+  - An optional badge goes at the very end of the line, after the description (see below).
+- **Not supported** inside the markers: wrapped or indented lines, nested or numbered lists, HTML comments, other prose, horizontal rules, and headings other than `###`. The check names the line to fix.
+- **Duplicates** are detected by canonical URL, so differences in GitHub owner/repo case, `.git`, a trailing slash, `http` versus `https` or `www.` on github.com, and `#fragment` are ignored.
+- **Changing a project's URL** gives it a new identity on the website, so any data attached to the old one (such as future hearts) must be migrated by the maintainer. Please mention it in your PR.
+- Text outside the markers is ordinary README content, but entries placed there would not be published, so the check **fails** on any list item (bulleted or numbered, at any indentation) outside the markers that begins with an `http(s)` link or carries a badge. Prose links, tables, quotes, relative or `#anchor` links, bullets that begin with text (for example `- Docs: [site](https://...)`), and code blocks are fine. Markers or entries shown inside a fenced code block are treated as examples; keep such fences at the top level (not inside a list item) and always close them.
+
 ## Badges
-We use simple badges to help readers spot new items:
+We use simple badges to help readers spot new items. An entry has at most one:
 
 - `![NEW](badges/new.svg)` – added in the current cycle
 - `![RECENT](badges/recent.svg)` – was NEW last cycle
