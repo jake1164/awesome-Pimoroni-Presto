@@ -34,17 +34,18 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 
 - [Official Presto Repo](https://github.com/pimoroni/presto)
 - [Cached Examples](https://github.com/AndrewCapon/presto-cached-examples)
-- [Home Assistant WebSocket Light Control](https://github.com/pimoroni/presto/tree/main/examples/home_assistant) — official example that syncs a light's state with Home Assistant over WebSocket and toggles it from the touchscreen. ![NEW](badges/new.svg)
-- [SCD41 CO₂ Monitor](https://github.com/pimoroni/presto/blob/main/examples/co2.py) — official example plotting CO₂, temperature and humidity history with min/max readings and rear LEDs coloured by CO₂ level; requires an SCD41 breakout. ![NEW](badges/new.svg)
+- [Home Assistant WebSocket Light Control](https://github.com/pimoroni/presto/tree/main/examples/home_assistant) — official example that syncs a light's state with Home Assistant over WebSocket and toggles it from the touchscreen. ![RECENT](badges/recent.svg)
+- [SCD41 CO₂ Monitor](https://github.com/pimoroni/presto/blob/main/examples/co2.py) — official example plotting CO₂, temperature and humidity history with min/max readings and rear LEDs coloured by CO₂ level; requires an SCD41 breakout. ![RECENT](badges/recent.svg)
 
 ### Development Tools
 
-- [Pimoroni Emulator](https://github.com/iksaif/pimoroni-emu) — unofficial desktop emulator with simulated Presto graphics and mouse-as-touch, plus headless testing and screenshot capture. ![NEW](badges/new.svg)
-- [Embedded Swift Presto Firmware](https://github.com/velocityzen/Presto) — Swift firmware/BSP with SwiftUI-inspired views, Pico SDK UF2 build and host-side UI tests. ![NEW](badges/new.svg)
+- [Official Presto C++ Boilerplate](https://github.com/pimoroni/presto-boilerplate) — Pimoroni's C++ starter project for native RP2350 Presto applications using the Pico SDK. ![NEW](badges/new.svg)
+- [Pimoroni Emulator](https://github.com/iksaif/pimoroni-emu) — unofficial desktop emulator with simulated Presto graphics and mouse-as-touch, plus headless testing and screenshot capture. ![RECENT](badges/recent.svg)
+- [Embedded Swift Presto Firmware](https://github.com/velocityzen/Presto) — Swift firmware/BSP with SwiftUI-inspired views, Pico SDK UF2 build and host-side UI tests. ![RECENT](badges/recent.svg)
 
 ### Tutorials
 
-- [Get the Latest News with Presto](https://learn.pimoroni.com/article/build-a-presto-newsfeed-app) — official Pimoroni Learn tutorial (29 May 2026) for a Wi-Fi RSS news reader with MicroPython, PicoVector and QR codes. ![NEW](badges/new.svg)
+- [Get the Latest News with Presto](https://learn.pimoroni.com/article/build-a-presto-newsfeed-app) — official Pimoroni Learn tutorial (29 May 2026) for a Wi-Fi RSS news reader with MicroPython, PicoVector and QR codes. ![RECENT](badges/recent.svg)
 - [Presto Development Workflow (VS Code + mpremote/MicroPico)](https://forums.pimoroni.com/t/presto-development-workflow/28105) — tips for a faster edit–run loop and deploying from VS Code instead of Thonny.
 - [Wi-Fi API Demo](https://forums.pimoroni.com/t/presto-wifi-demo/26947)
 - [Touchscreen Demo](https://forums.pimoroni.com/t/presto-touch-screen-demo/26915)
@@ -52,6 +53,8 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 
 ### Games
 
+- [Presto Arcade](https://github.com/robmarkcole/pimoroni-presto-arcade) — seven arcade games with a touchscreen game selector and an external Qw/ST Pad I²C controller; includes setup instructions and screenshots. ![NEW](badges/new.svg)
+- [BBC Micro / Master 128 Emulator](https://github.com/8bitkick/rp2350-bbc-micro) — BBC Micro and Master 128 emulation on Presto, with prebuilt firmware and Wi-Fi browser controls for keyboard input and disk management. ![NEW](badges/new.svg)
 - [Presto Snake](https://github.com/jake1164/presto-snake)
 
 ### Clocks
@@ -67,9 +70,15 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 
 ### Operating Systems
 
+- [ESPHome for Presto (Experimental)](https://github.com/Sawtaytoes/esphome-presto) — experimental ESPHome integration for Presto's display, touchscreen and rear LEDs, with Wi-Fi, encrypted API and OTA support; hardware support is still being tested. ![NEW](badges/new.svg)
 - [TmOS](https://github.com/themissingcow/pimoroni-presto-tmos)
 
 ### Other Projects
+
+- [Presto Home Assistant Dashboard](https://github.com/tbjers/Presto-HomeAssistant-Dashboard) — configurable touchscreen dashboard for Home Assistant with MQTT and a Node-RED bridge, supporting lights, sensors and scenes. ![NEW](badges/new.svg)
+- [Presto Football Dashboard](https://github.com/RohithPrakash/Presto-Football-Dashboard) — displays upcoming football fixtures, live scores and match results with club-themed visuals and ambient LEDs. ![NEW](badges/new.svg)
+- [Presto AI Dash](https://github.com/jake1164/presto-ai-dash) — touchscreen AI usage dashboard showing subscription quotas, reset times and service health; requires a separate Python/Docker daemon ([live demo](https://presto-dash.com/demo/)). ![NEW](badges/new.svg)
+- [Live UK Train Departure Board](https://github.com/robmarkcole/pimoroni-presto-train-display) — standalone MicroPython National Rail departures display with touch station selection, live platforms and one-minute refresh ([forum project](https://forums.pimoroni.com/t/live-uk-train-departure-board-for-presto/29141)). ![NEW](badges/new.svg)
 
 - [Desktop Companion](https://git.hack-hro.de/kmohrf/compresto)
 - [last.fm playing](https://github.com/andypiper/presto-lastfm)
@@ -82,15 +91,15 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Presto Maze](https://github.com/kurosuke/PrestoMaze) – interactive maze/pathfinding demo with touch input.
 - [X‑Plane 12 Attitude Indicator](https://github.com/PaulskPt/Presto_attitude_indicator_for_X-Plane12) – horizon instrument fed from a flight sim.
 - [Solar System demo](https://github.com/mrglennjones/presto-solar-system) – animated planets and orbits.
-- [Presto MQTT Multi-Topic Subscriber](https://github.com/PaulskPt/Presto_MQTT_multi_topic_subscriber) — MicroPython app subscribing to multiple MQTT topics for sensor telemetry and remote LED/colour commands, with publisher examples. ![RECENT](badges/recent.svg)
-- [LMS Controller (Logitech Media Server)](https://github.com/goodeb/LMS_controller) — now-playing display and touchscreen transport controller for a Lyrion/Logitech Media Server ([forum overview](https://forums.pimoroni.com/t/presto-music-system-display-controller/28312)). ![RECENT](badges/recent.svg)
-- [Presto-Cal (iCalendar + Timezone/DST)](https://github.com/dan-parker/Presto-Cal) — iCalendar viewer with MicroPython timezone and daylight-saving-time handling ([forum post](https://forums.pimoroni.com/t/micropython-timezone-and-dst-library/28318)). ![RECENT](badges/recent.svg)
-- [MacStatP — macOS System Monitor](https://github.com/vwillcox/MacStatP) — macOS CPU/GPU, memory, disk, network and process telemetry sent over USB serial to a tappable Presto dashboard. ![NEW](badges/new.svg)
-- [BuddyPresto — Claude Desk Pet](https://github.com/vwillcox/BuddyPresto) — Bluetooth-connected Claude session companion with permission approval/denial, session summaries and LED/buzzer alerts. ![NEW](badges/new.svg)
-- [Presto Immich Slideshow](https://github.com/vwillcox/presto-immich) — displays albums from a self-hosted Immich server as a touchscreen photo frame with web-based configuration. ![NEW](badges/new.svg)
-- [PrestoDeck for Music Assistant](https://github.com/jbslabs/PrestoDeckforMA) — Music Assistant/Home Assistant/MQTT fork of PrestoDeck with multi-provider playback, MQTT discovery and display/LED automation. ![NEW](badges/new.svg)
-- [Presto Cockpit](https://github.com/AEON-7/presto-cockpit) — multi-screen AI/GPU home-lab dashboard for agent activity, GPU/host metrics, uptime, sensors, crypto, news and clocks; optional backend services. ![NEW](badges/new.svg)
-- [Presto Poetry Kiosk](https://github.com/svandragt/presto-poetrykiosk) — MicroPython kiosk shuffling photo-and-poem slides with overlaid text and fade transitions. ![NEW](badges/new.svg)
+- [Presto MQTT Multi-Topic Subscriber](https://github.com/PaulskPt/Presto_MQTT_multi_topic_subscriber) — MicroPython app subscribing to multiple MQTT topics for sensor telemetry and remote LED/colour commands, with publisher examples.
+- [LMS Controller (Logitech Media Server)](https://github.com/goodeb/LMS_controller) — now-playing display and touchscreen transport controller for a Lyrion/Logitech Media Server ([forum overview](https://forums.pimoroni.com/t/presto-music-system-display-controller/28312)).
+- [Presto-Cal (iCalendar + Timezone/DST)](https://github.com/dan-parker/Presto-Cal) — iCalendar viewer with MicroPython timezone and daylight-saving-time handling ([forum post](https://forums.pimoroni.com/t/micropython-timezone-and-dst-library/28318)).
+- [MacStatP — macOS System Monitor](https://github.com/vwillcox/MacStatP) — macOS CPU/GPU, memory, disk, network and process telemetry sent over USB serial to a tappable Presto dashboard ([forum discussion](https://forums.pimoroni.com/t/pimoroni-presto-mac-stats-display/29049)). ![RECENT](badges/recent.svg)
+- [BuddyPresto — Claude Desk Pet](https://github.com/vwillcox/BuddyPresto) — Bluetooth-connected Claude session companion with permission approval/denial, session summaries and LED/buzzer alerts. ![RECENT](badges/recent.svg)
+- [Presto Immich Slideshow](https://github.com/vwillcox/presto-immich) — displays albums from a self-hosted Immich server as a touchscreen photo frame with web-based configuration. ![RECENT](badges/recent.svg)
+- [PrestoDeck for Music Assistant](https://github.com/jbslabs/PrestoDeckforMA) — Music Assistant/Home Assistant/MQTT fork of PrestoDeck with multi-provider playback, MQTT discovery and display/LED automation. ![RECENT](badges/recent.svg)
+- [Presto Cockpit](https://github.com/AEON-7/presto-cockpit) — multi-screen AI/GPU home-lab dashboard for agent activity, GPU/host metrics, uptime, sensors, crypto, news and clocks; optional backend services. ![RECENT](badges/recent.svg)
+- [Presto Poetry Kiosk](https://github.com/svandragt/presto-poetrykiosk) — MicroPython kiosk shuffling photo-and-poem slides with overlaid text and fade transitions. ![RECENT](badges/recent.svg)
 
 ### Community & Media
 
