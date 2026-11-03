@@ -21,11 +21,28 @@ Thanks for your interest in contributing to **Awesome Pimoroni Presto**!
 
   - Start with `- [title](URL)`; the URL must be `http` or `https` with a plain ASCII host. Write an internationalized host in its punycode (`xn--`) form; backslashes and invalid `%` escapes are rejected.
   - The description is optional. It follows an em dash (—), an en dash (–) or a hyphen and a space, stays on the same line, and may contain only plain text and `[text](https://...)` links (no HTML or images).
-  - An optional badge goes at the very end of the line, after the description (see below).
-- **Not supported** inside the markers: wrapped or indented lines, nested or numbered lists, HTML comments, other prose, horizontal rules, and headings other than `###`. The check names the line to fix.
+  - An optional badge goes at the end of the line, after the description (see below), and an optional image comment goes last of all (see **Project images**).
+- **Not supported** inside the markers: wrapped or indented lines, nested or numbered lists, HTML comments other than the one image comment, other prose, horizontal rules, and headings other than `###`. The check names the line to fix.
 - **Duplicates** are detected by canonical URL, so differences in GitHub owner/repo case, `.git`, a trailing slash, `http` versus `https` or `www.` on github.com, and `#fragment` are ignored.
 - **Changing a project's URL** gives it a new identity on the website, so any data attached to the old one (such as future hearts) must be migrated by the maintainer. Please mention it in your PR.
 - Text outside the markers is ordinary README content, but entries placed there would not be published, so the check **fails** on any list item (bulleted or numbered, at any indentation) outside the markers that begins with an `http(s)` link or carries a badge. Prose links, tables, quotes, relative or `#anchor` links, bullets that begin with text (for example `- Docs: [site](https://...)`), and code blocks are fine. Markers or entries shown inside a fenced code block are treated as examples; keep such fences at the top level (not inside a list item) and always close them.
+
+## Project images
+You only ever edit `README.md`. When the website is built it picks a photo or screenshot for your project's card automatically from your project's own README or page; if it finds nothing suitable, the card shows a category icon. There is nothing to upload and no approval step. A photo of a Presto running your project, or a screenshot, near the top of your own README (with a descriptive file name and alt text) gives the best result. Badges, logos, banners, diagrams and generic product photos are ignored.
+
+To guide or override the choice, end your entry with **one** HTML comment (after any badge):
+
+```markdown
+- [Project](https://github.com/owner/repo) — Description. <!-- image-hint: screenshots/ -->
+- [Project](https://github.com/owner/repo) — Description. <!-- image: https://example.com/photo.jpg -->
+- [Project](https://github.com/owner/repo) — Description. <!-- image: none -->
+```
+
+- `image-hint: path` – look first at a file (`images/presto.jpg`) or folder (`screenshots/`) in your own GitHub repository, relative to the repository (or to the linked folder for a `/tree/branch/folder` link). Plain relative paths only: no `..`, no leading `/`, no URLs.
+- `image: https://…` – prefer this one image (https only).
+- `image: none` – always show the category icon.
+
+Without a comment, discovery is fully automatic. Use at most one comment per entry; unknown or malformed ones fail the README check with the line to fix. If a hint or URL cannot be used, the site falls back to automatic selection (or the icon) and still builds. An unwanted or wrong image is corrected by changing your entry, or your own README, never site files. Details and limits: [site/README.md](site/README.md#project-images). The pull request template repeats these examples.
 
 ## Badges
 We use simple badges to help readers spot new items. An entry has at most one:

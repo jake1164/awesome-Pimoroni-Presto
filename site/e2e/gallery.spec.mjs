@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { catalogFile } from '../site-config.mjs';
+import { makePng } from '../tests/support/fixture-server.mjs';
 
 // Browser smoke tests for the built gallery (`npm run build`, then `npm run test:browser`).
 // Expected values come from the generated catalog or the page itself, never from a fixed project list.
@@ -17,9 +18,14 @@ async function open(page) {
     if (message.type() === 'error') problems.push(`console: ${message.text()}`);
   });
   page.on('requestfailed', (request) => problems.push(`request failed: ${request.url()}`));
+  // Project images are loaded from the projects' own hosts, so this test stubs them: it must not depend on the
+  // network, and it records everything that leaves the site. Only images may; anything else is refused.
   const external = [];
-  page.on('request', (request) => {
-    if (!request.url().startsWith('http://127.0.0.1') && !request.url().startsWith('data:')) external.push(request.url());
+  const stub = makePng(600, 400, [90, 90, 90]);
+  await page.route((url) => url.hostname !== '127.0.0.1', (route) => {
+    const request = route.request();
+    external.push({ url: request.url(), type: request.resourceType() });
+    return request.resourceType() === 'image' ? route.fulfill({ status: 200, contentType: 'image/png', body: stub }) : route.abort();
   });
   await page.goto('./');
   await expect(visibleCards(page)).toHaveCount(total);
@@ -31,7 +37,7 @@ async function expectCounter(page, expected) {
   await expect(page.locator('#result-count')).toHaveText(new RegExp(`^Showing ${expected} projects?$`));
 }
 
-test('loads every project with no runtime errors and no third-party requests', async ({ page }) => {
+test('loads every project with no runtime errors and no third-party requests other than project images', async ({ page }) => {
   const { problems, external } = await open(page);
   expect(total).toBeGreaterThan(0);
   await expectCounter(page, total);
@@ -40,7 +46,8 @@ test('loads every project with no runtime errors and no third-party requests', a
   await expect(page.locator('#reset-filters')).toBeHidden();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   expect(problems).toEqual([]);
-  expect(external).toEqual([]);
+  expect(external.filter((request) => request.type !== 'image')).toEqual([]);
+  expect(external.every((request) => request.url.startsWith('https://'))).toBe(true);
 });
 
 test('search narrows results immediately and clearing restores them', async ({ page }) => {

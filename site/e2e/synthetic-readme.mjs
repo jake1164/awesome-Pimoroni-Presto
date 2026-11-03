@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// Writes the synthetic README for e2e/all-category.spec.mjs. The Playwright web server builds the site from it
+// Writes the synthetic README for e2e/all-category.spec.mjs and e2e/images.spec.mjs. e2e/synthetic-site.mjs builds the site from it
 // into `.synthetic/` (see playwright.config.mjs), so the real catalog and `dist/` are never touched.
 // One category is literally named "All" (slug `all`); badges are split so NEW and RECENT live in different categories.
 const directory = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '.synthetic');
@@ -20,6 +20,15 @@ const readme = `# Synthetic list
 
 - [Other Gamma](https://example.org/other-gamma) — A project outside the All category. ![RECENT](badges/recent.svg)
 - [Other Delta](https://example.org/other-delta) — Another project outside the All category.
+- [Fixture With Image](https://github.com/fixture/with-image) — README-only project whose README embeds a picture.
+- [Fixture No Image](https://github.com/fixture/no-image) — README-only project with no picture at all.
+- [Fixture Rejected Image](https://github.com/fixture/rejected-image) — Its only README pictures are missing or too small.
+- [Fixture Runtime Missing](https://github.com/fixture/runtime-missing) — Picture is valid at build time, then disappears.
+- [Fixture Large Image](https://github.com/fixture/large-image) — Very large picture.
+- [Fixture Tall Image](https://github.com/fixture/tall-image) — Very tall picture.
+- [Fixture Hinted](https://github.com/fixture/hinted) — README picture, but the entry prefers a screenshots folder. <!-- image-hint: shots/ -->
+- [Fixture Hint Fallback](https://github.com/fixture/hint-fallback) — The hinted folder does not exist, so the README picture is used. <!-- image-hint: nowhere/ -->
+- [Fixture Forced Icon](https://github.com/fixture/forced-icon) — Has a README picture but the entry asks for the icon. <!-- image: none -->
 
 <!-- catalog:end -->
 `;

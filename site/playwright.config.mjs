@@ -3,7 +3,8 @@ import { base } from './site-config.mjs';
 
 // Tests run against the production build (`npm run build`) served by `astro preview`.
 // Port 4321 is avoided because Windows can reserve it; override with PRESTO_E2E_PORT.
-// A second site, built from a synthetic README into `.synthetic/`, serves e2e/all-category.spec.mjs.
+// A second site, built from a synthetic README into `.synthetic/` with a local stand-in for GitHub (no network),
+// serves e2e/all-category.spec.mjs and e2e/images.spec.mjs.
 const port = Number(process.env.PRESTO_E2E_PORT ?? 8765);
 const syntheticPort = Number(process.env.PRESTO_E2E_SYNTHETIC_PORT ?? 8772);
 const root = base.replace(/\/$/, '');
@@ -18,18 +19,23 @@ export default defineConfig({
   projects: [
     {
       name: 'desktop',
-      testIgnore: /all-category/,
+      testIgnore: /all-category|images\.spec/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 }, baseURL: urlFor(port) },
     },
     {
       name: 'mobile',
-      testIgnore: /all-category/,
+      testIgnore: /all-category|images\.spec/,
       use: { ...devices['Pixel 7'], baseURL: urlFor(port) },
     },
     {
       name: 'synthetic',
-      testMatch: /all-category\.spec\.mjs/,
+      testMatch: /(all-category|images)\.spec\.mjs/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 }, baseURL: urlFor(syntheticPort) },
+    },
+    {
+      name: 'synthetic-mobile',
+      testMatch: /images\.spec\.mjs/,
+      use: { ...devices['Pixel 7'], baseURL: urlFor(syntheticPort) },
     },
   ],
   webServer: [
@@ -40,15 +46,12 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
-      command: `node e2e/synthetic-readme.mjs && npm run build && npm run preview -- --host 127.0.0.1 --port ${syntheticPort}`,
+      // Builds the synthetic site (README, local stand-in for GitHub, discovery, Astro) and serves it; see the script.
+      command: 'node e2e/synthetic-site.mjs',
       url: urlFor(syntheticPort),
       reuseExistingServer: false,
-      timeout: 120_000,
-      env: {
-        PRESTO_README: '.synthetic/README.md',
-        PRESTO_CATALOG_FILE: '.synthetic/catalog.json',
-        PRESTO_OUT_DIR: '.synthetic/dist',
-      },
+      timeout: 180_000,
+      env: { PRESTO_E2E_SYNTHETIC_PORT: String(syntheticPort) },
     },
   ],
 });

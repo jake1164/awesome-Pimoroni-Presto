@@ -2,9 +2,18 @@
 import Layout from '../layouts/Layout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import catalog from '@catalog';
-import { repositoryUrl } from '../../site-config.mjs';
+import imageCache from '@image-cache';
+import { imageProps, usableImages } from '../lib/image-discovery.mjs';
+import { base, repositoryUrl } from '../../site-config.mjs';
 
 const categories = catalog.categories;
+const root = base.replace(/\/$/, '');
+// Images are discovered at build time from each project's own page (scripts/discover-images.mjs) and cached.
+// Only projects in the current catalog can show one; a project without a result keeps its category icon.
+const discovered = usableImages(imageCache, catalog.projects);
+const allowLoopbackHttp = process.env.PRESTO_IMAGE_ALLOW_LOCAL === '1'; // test fixtures only
+const imageFor = (project) => imageProps(discovered.get(project.id), project, { allowLoopbackHttp });
+const hasImages = catalog.projects.some((project) => imageFor(project));
 // Same default order the client applies for "Name", so the first paint does not reshuffle.
 const projects = [...catalog.projects].sort((a, b) =>
   a.title.localeCompare(b.title, undefined, { sensitivity: 'base', numeric: true }),
@@ -71,7 +80,7 @@ const categoryIcons = Object.fromEntries(
 
     <ul class="project-grid" id="project-grid" role="list" aria-label="Projects">
       {projects.map((project) => (
-        <ProjectCard project={project} icon={categoryIcons[project.category_slug] ?? 'grid'} />
+        <ProjectCard project={project} icon={categoryIcons[project.category_slug] ?? 'grid'} image={imageFor(project)} />
       ))}
     </ul>
     <div class="empty-state" id="empty-state" hidden>
@@ -79,6 +88,12 @@ const categoryIcons = Object.fromEntries(
       <p>Try another search or clear your filters to explore the collection.</p>
       <button type="button" class="pill" id="empty-reset">Clear filters</button>
     </div>
+    {hasImages && (
+      <p class="gallery-note">
+        Preview images are found automatically and loaded directly from each project's own repository or website.
+        They belong to their authors.
+      </p>
+    )}
   </main>
 </Layout>
 
@@ -89,7 +104,9 @@ const categoryIcons = Object.fromEntries(
 </style>
 
 <script>
-  import { filterAndSortCards, renderResultCount } from '../scripts/catalog-controls.js';
+  import { filterAndSortCards, renderResultCount, watchCardImages } from '../scripts/catalog-controls.js';
+
+  watchCardImages(document.querySelectorAll<HTMLImageElement>('.card-image'));
 
   const cards = [...document.querySelectorAll<HTMLElement>('.project-card')];
   const search = document.querySelector<HTMLInputElement>('#project-search')!;

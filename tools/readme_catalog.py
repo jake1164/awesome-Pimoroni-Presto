@@ -32,6 +32,34 @@ The catalog is the text between two HTML-comment markers, each on its own line::
   (GitHub then renders the rest of the README as code, so it is visibly broken).
   Keep example fences at the top level and always close them.
 
+Optional image directive
+------------------------
+An entry may end with ONE HTML comment that tells the website how to choose its card
+image. Entries without one keep working unchanged. Directives are metadata only:
+they never appear in ``description`` and never affect the project ``id``::
+
+    - [Name](https://github.com/o/r) — Description. <!-- image-hint: screenshots/ -->
+    - [Name](https://github.com/o/r) — Description. <!-- image: https://example.org/photo.jpg -->
+    - [Name](https://github.com/o/r) — Description. <!-- image: none -->
+
+* ``image-hint: PATH`` prefers a file or directory inside the project's own GitHub
+  repository (relative to the repository, or to the linked directory for
+  ``.../tree/<branch>/<dir>`` projects). ``PATH`` is plain relative segments
+  (letters, digits, ``._-+@()`` and inner spaces); a trailing ``/`` marks a
+  directory, otherwise the last segment must end in .png/.jpg/.jpeg/.gif/.webp/.svg.
+  No scheme, ``/`` prefix, ``.``/``..``/empty segment, backslash, ``%``, ``?`` or ``#``.
+  GitHub projects only.
+* ``image: URL`` prefers one https image URL (credentials, whitespace and control
+  characters are rejected like any URL).
+* ``image: none`` forces the category icon.
+* The comment must be the last thing on the line, after any NEW/RECENT badge. At most
+  one comment per entry; unknown names, empty values, other comments and a second
+  directive (duplicate or conflicting) are errors.
+
+The catalog gets an optional ``image`` object only for entries that have a directive:
+``{"mode": "hint", "value": "screenshots/"}``, ``{"mode": "url", "value": "https://..."}``
+or ``{"mode": "none"}``. Consumers must treat a missing key as automatic discovery.
+
 Text contract (for consumers such as the future Astro site)
 -----------------------------------------------------------
 ``title`` and ``category`` names are plain text. ``description`` is plain text
@@ -70,7 +98,7 @@ from urllib.parse import quote, urlsplit, urlunsplit
 
 
 SCHEMA_VERSION = 1
-GENERATOR_VERSION = "1.1.0"
+GENERATOR_VERSION = "1.2.0"
 IDENTITY_VERSION = 1
 
 CATALOG_START = "catalog:start"
@@ -109,6 +137,13 @@ FORBIDDEN_CODEPOINTS = frozenset(
     [0x061C, 0x200E, 0x200F, 0xFEFF] + list(range(0x202A, 0x202F)) + list(range(0x2066, 0x206A))
 )
 FORBIDDEN_CATEGORIES = frozenset({"Cc", "Zl", "Zp"})
+
+IMAGE_DIRECTIVES = ("image", "image-hint")
+DIRECTIVE_PATTERN = re.compile(r"^([A-Za-z][A-Za-z0-9_-]*)[ \t]*:[ \t]*(.*)$", re.DOTALL)
+IMAGE_FILE_PATTERN = re.compile(r"\.(?:png|jpe?g|gif|webp|svg)$", re.IGNORECASE)
+HINT_SEGMENT_PATTERN = re.compile(r"^[\w.+@()-]+(?: [\w.+@()-]+)*$")
+MAX_HINT_LENGTH = 200
+MAX_HINT_DEPTH = 6
 
 
 class CatalogError(ValueError):
@@ -561,6 +596,161 @@ def _extract_badges(remainder: str, line_number: int) -> tuple[str, list[str]]:
     return remainder[:text_end], badges
 
 
+def _html_comments(text: str, line_number: int) -> list[tuple[int, int]]:
+    """Return ``(start, end)`` of every unescaped ``<!-- ... -->`` in ``text``.
+
+    A backslash escapes the next character, so ``\\<!-- x -->`` is literal text (as
+    before directives existed). An unterminated comment is an error.
+    """
+
+    spans: list[tuple[int, int]] = []
+    index = 0
+    while index < len(text):
+        if text[index] == "\\":
+            index += 2
+        elif text.startswith("<!--", index):
+            close = text.find("-->", index + 4)
+            if close == -1:
+                raise _line_error(
+                    line_number,
+                    "unterminated HTML comment; an image directive looks like `<!-- image: none -->`",
+                )
+            spans.append((index, close + 3))
+            index = close + 3
+        else:
+            index += 1
+    return spans
+
+
+def _parse_image_url(value: str, line_number: int) -> str:
+    if not value:
+        raise _line_error(line_number, "`image:` needs a value: an https image URL, or `none`")
+    if value.casefold() == "none" and value != "none":
+        raise _line_error(line_number, "write `image: none` in lower case to disable the image")
+    lowered = value.casefold()
+    if not lowered.startswith("https://"):
+        scheme = urlsplit(value).scheme if ":" in value else ""
+        found = f"`{scheme}:` URLs are" if scheme else "a value that is not an absolute URL is"
+        raise _line_error(
+            line_number,
+            f"`image:` accepts only https URLs or `none`, but {found} not supported "
+            f"(value: `{value}`); to search inside the repository use `image-hint: path/`",
+        )
+    if len(value) > MAX_URL_LENGTH:
+        raise _line_error(line_number, f"image URL is longer than {MAX_URL_LENGTH} characters")
+    try:
+        return normalize_url(value)
+    except ValueError as error:
+        raise _line_error(line_number, f"invalid `image:` URL `{value}`: {error}") from error
+
+
+def _parse_image_hint(value: str, project_url: str, line_number: int) -> str:
+    if urlsplit(project_url).hostname not in GITHUB_HOSTS:
+        raise _line_error(
+            line_number,
+            "`image-hint:` only applies to GitHub repository projects; "
+            "use `image: https://...` to choose an image for another site",
+        )
+    if not value:
+        raise _line_error(line_number, "`image-hint:` needs a path such as `screenshots/` or `images/photo.jpg`")
+    if re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", value) or value.startswith("//"):
+        raise _line_error(
+            line_number,
+            f"`image-hint:` is a path inside the project's repository, not a URL (value: `{value}`); "
+            "use `image: https://...` for an image URL",
+        )
+    if len(value) > MAX_HINT_LENGTH:
+        raise _line_error(line_number, f"`image-hint:` is longer than {MAX_HINT_LENGTH} characters")
+    if value.startswith("/"):
+        raise _line_error(
+            line_number,
+            f"`image-hint:` must be relative to the repository, without a leading `/` (value: `{value}`)",
+        )
+    is_directory = value.endswith("/")
+    segments = value[:-1].split("/") if is_directory else value.split("/")
+    if len(segments) > MAX_HINT_DEPTH:
+        raise _line_error(line_number, f"`image-hint:` has more than {MAX_HINT_DEPTH} path segments")
+    for segment in segments:
+        if segment in ("", ".", ".."):
+            raise _line_error(
+                line_number,
+                f"unsafe `image-hint:` path `{value}`: `.`, `..` and empty segments (`//`) are not allowed",
+            )
+        if not HINT_SEGMENT_PATTERN.match(segment):
+            raise _line_error(
+                line_number,
+                f"unsupported character in `image-hint:` path `{value}`; use letters, digits, "
+                "`.`, `_`, `-`, `+`, `@`, `(`, `)` and single inner spaces (no backslash, `%`, `?` or `#`)",
+            )
+    if not is_directory and not IMAGE_FILE_PATTERN.search(segments[-1]):
+        raise _line_error(
+            line_number,
+            f"ambiguous `image-hint:` `{value}`: add a trailing `/` for a directory, or use a file name "
+            "ending in .png, .jpg, .jpeg, .gif, .webp or .svg",
+        )
+    return value
+
+
+def _extract_image_directive(
+    remainder: str, project_url: str, line_number: int
+) -> tuple[str, dict[str, str] | None]:
+    """Split a trailing image directive off the text after the project link."""
+
+    spans = _html_comments(remainder, line_number)
+    if not spans:
+        return remainder, None
+    first_start = spans[0][0]
+    cursor = first_start
+    only_comments_follow = True
+    for start, end in spans:
+        if remainder[cursor:start].strip():
+            only_comments_follow = False
+            break
+        cursor = end
+    if only_comments_follow and remainder[cursor:].strip():
+        only_comments_follow = False
+    if not only_comments_follow:
+        raise _line_error(
+            line_number,
+            "raw HTML comments are not supported except as the image directive at the very end of the entry "
+            "(after the description and any NEW/RECENT badge): `<!-- image: none -->`, "
+            "`<!-- image: https://... -->` or `<!-- image-hint: path/ -->`",
+        )
+    names: list[str] = []
+    parsed: list[tuple[str, str]] = []
+    for start, end in spans:
+        body = remainder[start + 4 : end - 3].strip()
+        match = DIRECTIVE_PATTERN.match(body)
+        if not match:
+            raise _line_error(
+                line_number,
+                f"unrecognized HTML comment `<!-- {body} -->`; the only supported comments are image "
+                "directives such as `<!-- image: none -->`",
+            )
+        name, value = match.group(1), match.group(2).strip()
+        if name not in IMAGE_DIRECTIVES:
+            raise _line_error(
+                line_number,
+                f"unknown directive `{name}`; supported directives are "
+                + " and ".join(f"`{known}`" for known in IMAGE_DIRECTIVES),
+            )
+        names.append(name)
+        parsed.append((name, value))
+    if len(parsed) > 1:
+        if len(set(names)) == 1:
+            raise _line_error(line_number, f"duplicate `{names[0]}` directive; use only one image directive per entry")
+        raise _line_error(
+            line_number,
+            "conflicting image directives (`image-hint` and `image`); use only one image directive per entry",
+        )
+    name, value = parsed[0]
+    if name == "image":
+        if value == "none":
+            return remainder[:first_start], {"mode": "none"}
+        return remainder[:first_start], {"mode": "url", "value": _parse_image_url(value, line_number)}
+    return remainder[:first_start], {"mode": "hint", "value": _parse_image_hint(value, project_url, line_number)}
+
+
 def _parse_entry(
     line: str, line_number: int, category: str, category_slug: str
 ) -> dict[str, object]:
@@ -585,7 +775,8 @@ def _parse_entry(
     except ValueError as error:
         raise _line_error(line_number, f"invalid project URL `{raw_url}`: {error}") from error
 
-    remainder, badges = _extract_badges(content[next_index:], line_number)
+    text_after_link, image = _extract_image_directive(content[next_index:], url, line_number)
+    remainder, badges = _extract_badges(text_after_link, line_number)
     remainder = re.sub(r"[ \t]+", " ", remainder).strip(" ")
 
     parts: list[dict[str, str]] = []
@@ -599,7 +790,7 @@ def _parse_entry(
             )
         parts = _parse_description(remainder[separator.end() :], line_number)
 
-    return {
+    project: dict[str, object] = {
         "id": project_id(url),
         "category": category,
         "category_slug": category_slug,
@@ -609,6 +800,9 @@ def _parse_entry(
         "description_parts": parts,
         "badges": badges,
     }
+    if image is not None:
+        project["image"] = image
+    return project
 
 
 def _slugify(name: str) -> str:

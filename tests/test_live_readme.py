@@ -42,6 +42,7 @@ from support import (
 README_PATH = Path(os.environ.get("PRESTO_README_PATH", ROOT / "README.md"))
 TOP_LEVEL_KEYS = {"schema_version", "generator_version", "identity_version", "categories", "projects"}
 PROJECT_KEYS = {"id", "category", "category_slug", "title", "url", "description", "description_parts", "badges"}
+OPTIONAL_PROJECT_KEYS = {"image"}  # present only for entries with an image directive
 
 
 class LiveReadmeInvariantTests(CatalogTestCase):
@@ -74,7 +75,10 @@ class LiveReadmeInvariantTests(CatalogTestCase):
         last_category_index = 0
         for project in projects:
             with self.subTest(url=project["url"]):
-                self.assertEqual(set(project), PROJECT_KEYS)
+                self.assertTrue(PROJECT_KEYS <= set(project) <= PROJECT_KEYS | OPTIONAL_PROJECT_KEYS, set(project))
+                if "image" in project:
+                    self.assertIn(project["image"]["mode"], {"hint", "url", "none"})
+                    self.assertNotIn("<!--", project["description"])
                 for field in ("id", "category", "category_slug", "title", "url", "description"):
                     self.assertIsInstance(project[field], str)
                 self.assertIsInstance(project["description_parts"], list)
@@ -426,9 +430,11 @@ class FrozenSnapshotRegressionTests(CatalogTestCase):
     def test_snapshot_catalog_output_is_byte_stable(self) -> None:
         # A change-detector for the serialized format, not a correctness oracle: the
         # tests above verify the content independently. Update this value only when
-        # intentionally changing the output (and bump generator_version).
+        # intentionally changing the output (and bump generator_version). The previous value (2f9ebb7e...)
+        # belonged to generator 1.1.0; 1.2.0 (image directives) differs only in that version string, and the frozen
+        # snapshot, which has no directives, gets no `image` keys.
         digest = hashlib.sha256(render_catalog(self.catalog).encode("utf-8")).hexdigest()
-        self.assertEqual(digest, "2f9ebb7e23d78112aed84d4c9f9434754d9b1088eb4b5eefc3d2372bda2e1ceb")
+        self.assertEqual(digest, "422f6819e58d24374d007b67890148527ef2ef6ff34052432a1dab377ffe91be")
 
 
 if __name__ == "__main__":

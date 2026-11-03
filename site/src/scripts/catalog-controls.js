@@ -25,3 +25,22 @@ export function renderResultCount(container, total) {
   strong.textContent = String(total);
   container.replaceChildren('Showing ', strong, ` ${noun}`);
 }
+
+// Card images are optional. A card's category icon sits underneath its image, so when an image fails (missing
+// file, bad URL, blocked request) the image is hidden and the icon shows; card size and controls never change.
+// The `complete && naturalWidth === 0` check covers images that failed before this script ran.
+export function watchCardImages(images) {
+  for (const image of images) {
+    const preview = image.closest('[data-image-state]');
+    const setState = (state) => {
+      if (preview) preview.dataset.imageState = state;
+      image.hidden = state === 'failed';
+    };
+    if (image.complete) {
+      setState(image.naturalWidth > 0 ? 'loaded' : 'failed');
+    } else {
+      image.addEventListener('load', () => setState('loaded'), { once: true });
+      image.addEventListener('error', () => setState('failed'), { once: true });
+    }
+  }
+}

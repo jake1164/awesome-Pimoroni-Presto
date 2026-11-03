@@ -16,3 +16,8 @@ export const catalogFile = process.env.PRESTO_CATALOG_FILE
   ? path.resolve(process.env.PRESTO_CATALOG_FILE)
   : path.join(siteDirectory, 'src', 'data', 'catalog.json');
 export const outDir = process.env.PRESTO_OUT_DIR ? path.resolve(process.env.PRESTO_OUT_DIR) : path.join(siteDirectory, 'dist');
+
+// Generated, disposable image-discovery results (see scripts/discover-images.mjs). Never committed; CI caches it.
+export const imageCacheFile = process.env.PRESTO_IMAGE_CACHE
+  ? path.resolve(process.env.PRESTO_IMAGE_CACHE)
+  : path.join(siteDirectory, '.cache', 'project-images.json');

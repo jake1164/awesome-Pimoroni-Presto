@@ -56,3 +56,54 @@ test('Pages workflow never cancels a deployment and keeps permissions minimal', 
   assert.match(top, /^permissions:\n  contents: read\n/m);
   assert.doesNotMatch(job(workflow, 'build'), /pages: write|id-token: write/);
 });
+
+test('Pages workflow caches discovered project images and treats the GitHub token as optional', async () => {
+  const workflow = await workflowText();
+  const build = job(workflow, 'build');
+  assert.match(build, /uses: actions\/cache@v4/);
+  assert.match(build, /path: site\/\.cache/);
+  assert.match(build, /restore-keys: project-images-/);
+  assert.ok(build.indexOf('actions/cache@v4') < build.indexOf('npm run build'), 'the cache must be restored before the build');
+  // The token only raises a rate limit: it comes from the built-in token, with no secret to configure.
+  assert.match(build, /GITHUB_TOKEN: \$\{\{ github\.token \}\}/);
+  assert.doesNotMatch(workflow, /secrets\./);
+  // Image discovery cannot fail the build, so no step may depend on it.
+  const script = await readFile(path.join(root, 'site', 'scripts', 'discover-images.mjs'), 'utf8');
+  assert.match(script, /process\.exitCode = 0/);
+  assert.doesNotMatch(script, /GITHUB_TOKEN[^\n]*(throw|exit\(1\))/);
+});
+
+test('weekly scheduled refresh runs the full validation and tests, keeps deploy restrictions, and skips unchanged deployments', async () => {
+  const workflow = await workflowText();
+  assert.match(workflow, /^  schedule:\n    - cron: '\d+ \d+ \* \* \d'$/m, 'one weekly cron entry');
+  const cron = workflow.match(/- cron: '([^']+)'/)[1].split(' ');
+  assert.equal(cron.length, 5);
+  assert.deepEqual(cron.slice(2, 4), ['*', '*'], 'weekly: only the weekday is fixed');
+  assert.match(cron[4], /^[0-6]$/);
+
+  // No job or step skips validation for scheduled runs.
+  const build = job(workflow, 'build');
+  assert.match(build, /needs: catalog-validation/);
+  assert.doesNotMatch(workflow.replace(/^\s*if: github\.event_name == 'schedule'$/m, ''), /github\.event_name == 'schedule'[^\n]*(npm test|test:browser|catalog)/);
+  for (const step of ['npm run build', 'npm test', 'npm run test:browser']) assert.ok(build.includes(step));
+
+  // Same deploy restrictions as before, plus the change check.
+  assert.match(build, /if: github\.event_name != 'pull_request' && github\.ref == 'refs\/heads\/main' && steps\.changed\.outputs\.deploy != 'false'/);
+  assert.match(job(workflow, 'deploy'), /github\.event_name != 'pull_request' && github\.ref == 'refs\/heads\/main' && github\.repository == 'jake1164\/awesome-Pimoroni-Presto' && needs\.build\.outputs\.deploy != 'false'/);
+  assert.match(build, /outputs:\n      deploy: \$\{\{ steps\.changed\.outputs\.deploy \}\}/);
+  assert.ok(build.indexOf('id: changed') > build.indexOf('npm run test:browser'), 'the change check follows the tests');
+  assert.ok(build.indexOf('id: changed') < build.indexOf('upload-pages-artifact'));
+  const changed = build.slice(build.indexOf('- name: Detect whether'), build.indexOf('- name: Upload Pages artifact'));
+  assert.match(changed, /if: github\.event_name == 'schedule'/, 'pushes and manual runs always deploy');
+  assert.match(changed, /sha256sum site\/dist\/index\.html/);
+  assert.match(changed, /deploy=true/, 'an unreachable live page means deploy');
+
+  // Scheduled runs refresh images, use the same cache, the built-in token and minimal permissions.
+  assert.match(build, /PRESTO_IMAGE_REFRESH: \$\{\{ github\.event_name == 'schedule' && '1' \|\| '' \}\}/);
+  assert.match(build, /uses: actions\/cache@v4/);
+  assert.doesNotMatch(workflow, /secrets\.|github\.token[^\n]*\n[^\n]*personal/i);
+  const top = workflow.split(/^jobs:/m)[0];
+  assert.match(top, /^permissions:\n  contents: read\n/m);
+  assert.doesNotMatch(build, /contents: write|pages: write|id-token: write/);
+  assert.doesNotMatch(workflow, /git (add|commit|push)/, 'generated image data is never committed');
+});

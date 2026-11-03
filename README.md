@@ -29,7 +29,7 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 ### Official Resources
 
 - [Product Page](https://shop.pimoroni.com/products/presto) – specifications, purchasing information and accessory recommendations direct from Pimoroni.
-- [Getting Started Guide](https://learn.pimoroni.com/article/getting-started-with-presto) – official walk-through covering setup, firmware flashing and the basics of the Presto interface; see the Touch & Vector Fonts section for button-handling and vector-font snippets.
+- [Getting Started Guide](https://learn.pimoroni.com/article/getting-started-with-presto) – official walk-through covering setup, firmware flashing and the basics of the Presto interface; see the Touch & Vector Fonts section for button-handling and vector-font snippets. <!-- image: none -->
 - [GitHub Releases & Firmware](https://github.com/pimoroni/presto/releases) – latest MicroPython builds (incl. "with-filesystem") and example updates.
 
 ### Code Examples
@@ -82,7 +82,7 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [Presto AI Dash](https://github.com/jake1164/presto-ai-dash) — touchscreen AI usage dashboard showing subscription quotas, reset times and service health; requires a separate Python/Docker daemon ([live demo](https://presto-dash.com/demo/)). ![NEW](badges/new.svg)
 - [Live UK Train Departure Board](https://github.com/robmarkcole/pimoroni-presto-train-display) — standalone MicroPython National Rail departures display with touch station selection, live platforms and one-minute refresh ([forum project](https://forums.pimoroni.com/t/live-uk-train-departure-board-for-presto/29141)). ![NEW](badges/new.svg)
 
-- [Desktop Companion](https://git.hack-hro.de/kmohrf/compresto)
+- [Desktop Companion](https://git.hack-hro.de/kmohrf/compresto) <!-- image: https://git.hack-hro.de/kmohrf/compresto/-/raw/main/screenshot.png -->
 - [last.fm playing](https://github.com/andypiper/presto-lastfm)
 - [PrestoDeck - Spotify music controller](https://github.com/fatihak/PrestoDeck)
 - [prestohoho - Joke display](https://github.com/mrglennjones/prestohoho)
@@ -91,11 +91,11 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 - [WiiM "What's Playing" display](https://github.com/retired-guy/WiiM-Presto) – album art & metadata from WiiM streamers.
 - [Presto Stream Deck Controller](https://github.com/goodeb/Presto-Stream-Deck) – touch button deck; maps presses to actions.
 - [Presto Maze](https://github.com/kurosuke/PrestoMaze) – interactive maze/pathfinding demo with touch input.
-- [X‑Plane 12 Attitude Indicator](https://github.com/PaulskPt/Presto_attitude_indicator_for_X-Plane12) – horizon instrument fed from a flight sim.
+- [X‑Plane 12 Attitude Indicator](https://github.com/PaulskPt/Presto_attitude_indicator_for_X-Plane12) – horizon instrument fed from a flight sim. <!-- image-hint: Images/04_2025-04-27_23h06.01.png -->
 - [Solar System demo](https://github.com/mrglennjones/presto-solar-system) – animated planets and orbits.
 - [Presto MQTT Multi-Topic Subscriber](https://github.com/PaulskPt/Presto_MQTT_multi_topic_subscriber) — MicroPython app subscribing to multiple MQTT topics for sensor telemetry and remote LED/colour commands, with publisher examples.
 - [LMS Controller (Logitech Media Server)](https://github.com/goodeb/LMS_controller) — now-playing display and touchscreen transport controller for a Lyrion/Logitech Media Server ([forum overview](https://forums.pimoroni.com/t/presto-music-system-display-controller/28312)).
-- [Presto-Cal (iCalendar + Timezone/DST)](https://github.com/dan-parker/Presto-Cal) — iCalendar viewer with MicroPython timezone and daylight-saving-time handling ([forum post](https://forums.pimoroni.com/t/micropython-timezone-and-dst-library/28318)).
+- [Presto-Cal (iCalendar + Timezone/DST)](https://github.com/dan-parker/Presto-Cal) — iCalendar viewer with MicroPython timezone and daylight-saving-time handling ([forum post](https://forums.pimoroni.com/t/micropython-timezone-and-dst-library/28318)). <!-- image: none -->
 - [MacStatP — macOS System Monitor](https://github.com/vwillcox/MacStatP) — macOS CPU/GPU, memory, disk, network and process telemetry sent over USB serial to a tappable Presto dashboard ([forum discussion](https://forums.pimoroni.com/t/pimoroni-presto-mac-stats-display/29049)). ![RECENT](badges/recent.svg)
 - [BuddyPresto — Claude Desk Pet](https://github.com/vwillcox/BuddyPresto) — Bluetooth-connected Claude session companion with permission approval/denial, session summaries and LED/buzzer alerts. ![RECENT](badges/recent.svg)
 - [Presto Immich Slideshow](https://github.com/vwillcox/presto-immich) — displays albums from a self-hosted Immich server as a touchscreen photo frame with web-based configuration. ![RECENT](badges/recent.svg)
