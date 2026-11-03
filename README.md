@@ -39,6 +39,7 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 
 ### Development Tools
 
+- [Official Presto C++ Boilerplate](https://github.com/pimoroni/presto-boilerplate) — Pimoroni's C++ starter project for native RP2350 Presto applications using the Pico SDK. ![NEW](badges/new.svg)
 - [Pimoroni Emulator](https://github.com/iksaif/pimoroni-emu) — unofficial desktop emulator with simulated Presto graphics and mouse-as-touch, plus headless testing and screenshot capture. ![RECENT](badges/recent.svg)
 - [Embedded Swift Presto Firmware](https://github.com/velocityzen/Presto) — Swift firmware/BSP with SwiftUI-inspired views, Pico SDK UF2 build and host-side UI tests. ![RECENT](badges/recent.svg)
 
@@ -52,6 +53,8 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 
 ### Games
 
+- [Presto Arcade](https://github.com/robmarkcole/pimoroni-presto-arcade) — seven arcade games with a touchscreen game selector and an external Qw/ST Pad I²C controller; includes setup instructions and screenshots. ![NEW](badges/new.svg)
+- [BBC Micro / Master 128 Emulator](https://github.com/8bitkick/rp2350-bbc-micro) — BBC Micro and Master 128 emulation on Presto, with prebuilt firmware and Wi-Fi browser controls for keyboard input and disk management. ![NEW](badges/new.svg)
 - [Presto Snake](https://github.com/jake1164/presto-snake)
 
 ### Clocks
@@ -67,10 +70,13 @@ Presto is your new RP2350-powered, connected desktop companion! It features a 4"
 
 ### Operating Systems
 
+- [ESPHome for Presto (Experimental)](https://github.com/Sawtaytoes/esphome-presto) — experimental ESPHome integration for Presto's display, touchscreen and rear LEDs, with Wi-Fi, encrypted API and OTA support; hardware support is still being tested. ![NEW](badges/new.svg)
 - [TmOS](https://github.com/themissingcow/pimoroni-presto-tmos)
 
 ### Other Projects
 
+- [Presto Home Assistant Dashboard](https://github.com/tbjers/Presto-HomeAssistant-Dashboard) — configurable touchscreen dashboard for Home Assistant with MQTT and a Node-RED bridge, supporting lights, sensors and scenes. ![NEW](badges/new.svg)
+- [Presto Football Dashboard](https://github.com/RohithPrakash/Presto-Football-Dashboard) — displays upcoming football fixtures, live scores and match results with club-themed visuals and ambient LEDs. ![NEW](badges/new.svg)
 - [Presto AI Dash](https://github.com/jake1164/presto-ai-dash) — touchscreen AI usage dashboard showing subscription quotas, reset times and service health; requires a separate Python/Docker daemon ([live demo](https://presto-dash.com/demo/)). ![NEW](badges/new.svg)
 - [Live UK Train Departure Board](https://github.com/robmarkcole/pimoroni-presto-train-display) — standalone MicroPython National Rail departures display with touch station selection, live platforms and one-minute refresh ([forum project](https://forums.pimoroni.com/t/live-uk-train-departure-board-for-presto/29141)). ![NEW](badges/new.svg)
 
