@@ -47,6 +47,8 @@ export function makePng(width, height, [r, g, b] = [200, 60, 60], { noise = fals
 
 /**
  * `repos` maps "owner/repo" to `{ files: { 'README.md': string | Buffer, 'images/a.png': Buffer }, social?: url }`.
+ * `stars` makes `GET /api/repos/<owner>/<repo>` answer like GitHub's repository API: a number is the star count; an object
+ * `{ status, body, headers }` is a raw answer (for failures and malformed bodies); absent means 404, a deleted repository.
  * Options: `rateLimitApi` answers API calls like an exhausted GitHub limit.
  */
 export async function startFixtureServer(repos, { port = 0, rateLimitApi = false } = {}) {
@@ -73,6 +75,16 @@ export async function startFixtureServer(repos, { port = 0, rateLimitApi = false
       if (content === undefined || hidden.has(file)) return send(404, 'text/plain', 'not found');
       const type = file.endsWith('.png') ? 'image/png' : file.endsWith('.md') ? 'text/plain' : 'application/octet-stream';
       return send(200, repo.contentTypes?.[file] ?? type, content);
+    }
+    if (kind === 'api' && rest.length === 0) {
+      if (rateLimitApi) return send(403, 'application/json', '{"message":"API rate limit exceeded"}', { 'x-ratelimit-remaining': '0' });
+      const answer = repo.stars;
+      if (answer === undefined) return send(404, 'application/json', '{"message":"Not Found"}', { 'x-ratelimit-remaining': '50' });
+      if (typeof answer === 'number') {
+        const body = JSON.stringify({ full_name: repo.fullName ?? `${owner}/${repoName}`, stargazers_count: answer });
+        return send(200, 'application/json', body, { 'x-ratelimit-remaining': '50' });
+      }
+      return send(answer.status ?? 200, 'application/json', answer.body ?? '{}', { 'x-ratelimit-remaining': '50', ...answer.headers });
     }
     if (kind === 'api' && rest[0] === 'contents') {
       // GET /api/repos/<owner>/<repo>/contents/<dir>: one directory, not recursive.

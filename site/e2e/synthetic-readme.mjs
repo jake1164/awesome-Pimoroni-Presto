@@ -29,6 +29,11 @@ const readme = `# Synthetic list
 - [Fixture Hinted](https://github.com/fixture/hinted) — README picture, but the entry prefers a screenshots folder. <!-- image-hint: shots/ -->
 - [Fixture Hint Fallback](https://github.com/fixture/hint-fallback) — The hinted folder does not exist, so the README picture is used. <!-- image-hint: nowhere/ -->
 - [Fixture Forced Icon](https://github.com/fixture/forced-icon) — Has a README picture but the entry asks for the icon. <!-- image: none -->
+- [Fixture With Image File](https://github.com/fixture/with-image/blob/main/README.md) — A file in a repository that another entry already lists: one star lookup serves both.
+- [Fixture No Image Folder](https://github.com/fixture/no-image/tree/main/docs) — A folder in a repository that another entry already lists.
+- [Fixture Gist](https://gist.github.com/someone/0123456789abcdef) — A gist is not a repository: no star count.
+- [Fixture Profile](https://github.com/fixture) — A profile page is not a repository: no star count.
+- [Fixture Issue](https://github.com/fixture/with-image/issues/1) — An issue is not a repository page: no star count.
 
 <!-- catalog:end -->
 `;

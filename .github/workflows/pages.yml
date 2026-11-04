@@ -3,10 +3,11 @@ name: Build and deploy gallery
 # Pull requests build and test the gallery but never deploy. Pushes to main, manual runs on main and the
 # weekly scheduled run deploy only after catalog validation, the site tests, and the browser tests pass.
 #
-# The scheduled run (Mondays 04:17 UTC, on the default branch) re-checks every project image, because remote
-# images change or disappear without any README change. It runs exactly the same validation and tests as a
-# push. It redeploys only if the rebuilt page differs from the live one (see "Detect whether a scheduled
-# refresh changed the site"). GitHub pauses scheduled workflows after 60 days without repository activity.
+# The scheduled run (Mondays 04:17 UTC, on the default branch) re-checks every project image and refreshes every
+# GitHub star count, because both change without any README change. It runs exactly the same validation and
+# tests as a push and then deploys like a push. It does not try to detect "nothing changed": the star counts
+# alone make the page differ almost every week, and a comparison against the live page is one more thing that can
+# be wrong. GitHub pauses scheduled workflows after 60 days without repository activity.
 on:
   pull_request:
   push:
@@ -34,8 +35,6 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
-    outputs:
-      deploy: ${{ steps.changed.outputs.deploy }}
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -64,14 +63,15 @@ jobs:
           name: presto-catalog
           path: site/src/data
 
-      # Project images are discovered at build time and remembered in a disposable cache. A cache miss only means
-      # the next build looks the images up again; nothing depends on it.
-      - name: Restore project image cache
+      # Project images and GitHub star counts are collected at build time and remembered in disposable files under
+      # site/.cache. A cache miss only means the next build looks them up again; nothing depends on it. Star counts are
+      # trusted for 24 hours, so a restored cache from an earlier push is reused and the weekly run finds it expired.
+      - name: Restore generated build cache (project images, GitHub stars)
         uses: actions/cache@v4
         with:
           path: site/.cache
-          key: project-images-${{ github.run_id }}
-          restore-keys: project-images-
+          key: gallery-cache-${{ github.run_id }}
+          restore-keys: gallery-cache-
 
       - name: Build site
         working-directory: site
@@ -79,7 +79,8 @@ jobs:
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           PRESTO_CATALOG_ARTIFACT: src/data/catalog.json
-          # Optional: only raises the GitHub API rate limit for image discovery. Builds work without it.
+          # Optional: only raises the GitHub API rate limit for image discovery and star counts. Builds work without
+          # it, and it needs no permission beyond the read-only contents access this job already has.
           GITHUB_TOKEN: ${{ github.token }}
           # Scheduled runs look every image up again instead of trusting cache entries up to a week old.
           # The restored cache is still used when a lookup fails, so a network problem keeps earlier results.
@@ -99,31 +100,14 @@ jobs:
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
 
-      # Every card, link and image URL is in index.html, and asset file names carry content hashes, so a
-      # byte-identical index.html means a visitor would see no difference. If the live page cannot be fetched,
-      # the safe default is to deploy. Only scheduled runs skip a deployment; pushes and manual runs always deploy.
-      - name: Detect whether a scheduled refresh changed the site
-        id: changed
-        if: github.event_name == 'schedule'
-        env:
-          LIVE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
-        run: |
-          new=$(sha256sum site/dist/index.html | cut -d' ' -f1)
-          if live=$(curl --fail --silent --show-error --location --max-time 30 "$LIVE_URL" | sha256sum | cut -d' ' -f1) && [ "$live" = "$new" ]; then
-            echo "The refreshed page is identical to the live page; skipping deployment."
-            echo "deploy=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "deploy=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Upload Pages artifact
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && steps.changed.outputs.deploy != 'false'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site/dist
 
   deploy:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'jake1164/awesome-Pimoroni-Presto' && needs.build.outputs.deploy != 'false'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'jake1164/awesome-Pimoroni-Presto'
     needs: [catalog-validation, build]
     runs-on: ubuntu-latest
     permissions:

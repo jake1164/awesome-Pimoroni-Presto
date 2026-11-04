@@ -11,6 +11,14 @@ export function filterAndSortCards(cards, { query = '', category = null, badge =
       return matchesQuery && matchesCategory && (!badge || badges.includes(badge));
     })
     .sort((first, second) => {
+      if (sortBy === 'stars') {
+        // Known counts first, highest first; cards without a known count follow. Ties fall back to the title, then
+        // to the project ID, so the order never depends on the DOM's current order.
+        const a = starCount(first);
+        const b = starCount(second);
+        if (a !== b) return a === null ? 1 : b === null ? -1 : b - a;
+        return collator.compare(first.dataset.title ?? '', second.dataset.title ?? '') || compareText(first.dataset.id, second.dataset.id);
+      }
       if (sortBy === 'category') {
         const categoryOrder = collator.compare(first.dataset.categoryName ?? '', second.dataset.categoryName ?? '');
         if (categoryOrder !== 0) return categoryOrder;
@@ -18,6 +26,16 @@ export function filterAndSortCards(cards, { query = '', category = null, badge =
       return collator.compare(first.dataset.title ?? '', second.dataset.title ?? '');
     });
 }
+
+// A card without `data-stars` (not a GitHub repository, or no count available) has no count: null, never 0.
+function starCount(card) {
+  const raw = card.dataset.stars;
+  if (raw === undefined || raw === '') return null;
+  const count = Number(raw);
+  return Number.isSafeInteger(count) && count >= 0 ? count : null;
+}
+
+const compareText = (first = '', second = '') => (first < second ? -1 : first > second ? 1 : 0);
 
 export function renderResultCount(container, total) {
   const noun = total === 1 ? 'project' : 'projects';

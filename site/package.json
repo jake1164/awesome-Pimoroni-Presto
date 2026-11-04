@@ -3,12 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node scripts/build-catalog.mjs && node scripts/discover-images.mjs && astro dev",
-    "build": "node scripts/build-catalog.mjs && node scripts/discover-images.mjs && astro build",
+    "dev": "node scripts/build-catalog.mjs && node scripts/fetch-stars.mjs && node scripts/discover-images.mjs && astro dev",
+    "build": "node scripts/build-catalog.mjs && node scripts/fetch-stars.mjs && node scripts/discover-images.mjs && astro build",
+    "stars:report": "node scripts/fetch-stars.mjs --report",
     "images:report": "node scripts/discover-images.mjs --report",
     "preview": "astro preview",
     "test": "node --test tests/*.test.mjs",
     "test:browser": "playwright test",
+    "test:readme-variants": "node e2e/readme-variants.mjs",
     "astro": "astro"
   },
   "engines": {

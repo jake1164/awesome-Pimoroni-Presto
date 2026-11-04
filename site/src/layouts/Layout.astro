@@ -42,9 +42,9 @@ const root = base.replace(/\/$/, '');
   .panel-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
   h1 { margin: 0; font-size: 2rem; line-height: 1.2; font-weight: 700; letter-spacing: -.01em; }
   .subtitle { margin: 4px 0 0; color: var(--text-soft); font-size: 1.125rem; }
-  .github-link { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 50%; color: var(--text-soft); }
-  .github-link:hover { color: #fff; background: #151517; }
-  .github-link svg { width: 28px; height: 28px; fill: currentColor; }
+  .star-repo { min-height: 44px; flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border: 1px solid var(--border-strong); border-radius: 999px; color: var(--text); font-size: .9375rem; font-weight: 600; text-decoration: none; transition: background-color .15s ease, border-color .15s ease; }
+  .star-repo:hover { border-color: #9a9aa3; background: #151517; }
+  .star-repo svg { width: 18px; height: 18px; flex: none; fill: #e3b341; }
 
   .search-box { display: block; margin-top: 24px; }
   .search-box input { width: 100%; height: 56px; padding: 0 28px; border: 1px solid var(--border-strong); border-radius: 999px; background: transparent; font-size: 1.125rem; }
@@ -81,11 +81,26 @@ const root = base.replace(/\/$/, '');
   .card-content > :nth-last-child(2) { margin-bottom: 16px; }
   .card-description a { text-underline-offset: 3px; }
   .card-footer { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .card-meta { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0 14px; min-width: 0; }
   .category-label { color: var(--muted); font-size: .9375rem; }
+  .star-link { min-height: 44px; display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: .9375rem; text-decoration: none; font-variant-numeric: tabular-nums; }
+  .star-link svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+  .star-link:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
   .project-link { min-height: 44px; display: inline-flex; align-items: center; font-size: 1rem; font-weight: 600; text-underline-offset: 3px; }
   .project-link.unavailable { color: var(--muted); font-weight: 400; }
 
   .gallery-note { margin: 24px auto 0; max-width: 46rem; text-align: center; color: var(--muted); font-size: .9375rem; }
+  .support { margin: 32px 0 0; padding: 28px 24px; border: 1px solid var(--border); border-radius: 22px; text-align: center; }
+  .support h2 { margin: 0 0 8px; font-size: 1.25rem; line-height: 1.3; font-weight: 650; }
+  .support p { max-width: 42rem; margin: 0 auto; color: var(--text-soft); font-size: .9375rem; }
+  .support-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 20px 0 0; padding: 0; list-style: none; }
+  .support-button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 20px; border: 1px solid var(--border-strong); border-radius: 999px; color: var(--text); font-size: .9375rem; font-weight: 600; text-decoration: none; transition: background-color .15s ease, border-color .15s ease; }
+  .support-button:hover { border-color: #9a9aa3; background: #151517; }
+  .support-button svg { width: 20px; height: 20px; flex: none; }
+  .support-button .icon-star { fill: #e3b341; }
+  .support-button .icon-heart { fill: #ea4aaa; }
+  .support-button .icon-coffee { fill: none; stroke: #ffdd00; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
   .empty-state { padding: 64px 16px 48px; text-align: center; }
   .empty-state h2 { margin: 0 0 8px; font-size: 1.375rem; }
   .empty-state p { margin: 0 0 20px; color: var(--muted); }
@@ -103,6 +118,9 @@ const root = base.replace(/\/$/, '');
     .card-preview { height: 150px; }
     .card-content { padding: 0 18px 14px; }
     .card-image { padding: 10px; }
+    .support { padding: 22px 16px; }
+    .support-actions { flex-direction: column; align-items: stretch; }
+    .support-button { width: 100%; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition-duration: .01ms !important; }

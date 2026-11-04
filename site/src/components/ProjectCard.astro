@@ -2,7 +2,9 @@
 // `image` is optional (see src/lib/image-discovery.mjs). It is the project's own image, loaded from the author's
 // host, so it can fail at any time. The category icon is always rendered underneath it: a project without an
 // image, an image still loading, and an image that fails to load all show the same fallback.
-const { project, icon, image = null } = Astro.props;
+// `stars` is optional too: `{ count, formatted, label, title, url }` from src/lib/github-stars.mjs, present only
+// for a GitHub repository whose star count is known. Unknown is never shown as zero.
+const { project, icon, image = null, stars = null } = Astro.props;
 
 // Outline icons shown in place of a screenshot. `grid` is the generic fallback for any category.
 const iconPaths = {
@@ -37,6 +39,7 @@ const searchText = [project.title, project.description, project.category].join('
   data-category={project.category_slug}
   data-category-name={project.category}
   data-badges={project.badges.join(',')}
+  data-stars={stars ? String(stars.count) : undefined}
   data-search={searchText}
 >
   <div class="card-preview" data-category-fallback={icon} data-image-state={image ? 'pending' : 'none'}>
@@ -73,7 +76,15 @@ const searchText = [project.title, project.description, project.category].join('
       </p>
     )}
     <div class="card-footer">
-      <span class="category-label">{project.category}</span>
+      <span class="card-meta">
+        <span class="category-label">{project.category}</span>
+        {stars && (
+          <a class="star-link" href={stars.url} target="_blank" rel="noopener noreferrer" aria-label={stars.label} title={stars.title}>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z" /></svg>
+            <span aria-hidden="true">{stars.formatted}</span>
+          </a>
+        )}
+      </span>
       {projectUrl
         ? <a class="project-link" href={projectUrl} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${project.title} project`}>Visit project ↗</a>
         : <span class="project-link unavailable">Link unavailable</span>}

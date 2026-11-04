@@ -15,8 +15,9 @@
 // photos. They cannot prove that an image is the right one; see site/README.md "Project images".
 
 import { createHash } from 'node:crypto';
+import { BlockedDestinationError, InvalidResponseError, pinnedGet, resolveHost, vetDestination } from './safe-network.mjs';
 
-export const DISCOVERY_VERSION = 2; // raise whenever rules, cache identity or cache format change
+export const DISCOVERY_VERSION = 3; // raise whenever rules, cache identity or cache format change
 export const CACHE_SCHEMA_VERSION = 1;
 
 export const DEFAULT_ENDPOINTS = {
@@ -120,7 +121,12 @@ export function parseProjectUrl(value) {
   }
   const host = url.hostname.toLowerCase();
   if (host !== 'github.com' && host !== 'www.github.com') return { type: 'web', url };
-  const segments = url.pathname.split('/').filter(Boolean).map(decodeURIComponent);
+  let segments;
+  try {
+    segments = url.pathname.split('/').filter(Boolean).map(decodeURIComponent);
+  } catch {
+    return { type: 'unsupported', reason: 'malformed percent-encoding in the project URL' };
+  }
   if (segments.length < 2) return { type: 'unsupported', reason: 'GitHub profile or organization page' };
   const [owner, rawRepo, kind, branch, ...rest] = segments;
   const repo = rawRepo.replace(/\.git$/i, '');
@@ -152,7 +158,12 @@ function htmlAttribute(tag, name) {
 function decodeEntities(text) {
   return text
     .replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)));
+    .replace(/&#(\d+);/g, (_, code) => characterReference(Number(code)));
+}
+
+// HTML turns a reference to NUL, a surrogate or a code point beyond U+10FFFF into U+FFFD; String.fromCodePoint would throw.
+function characterReference(code) {
+  return code === 0 || code > 0x10ffff || (code >= 0xd800 && code <= 0xdfff) ? '\uFFFD' : String.fromCodePoint(code);
 }
 
 /** Image references in README Markdown (inline, reference-style and HTML `<img>`), in document order. */
@@ -247,6 +258,7 @@ const CAMERA_NAME = /^(img|dsc|dscn|pxl|image|photo)[_-]?\d+|^\d{8}[_-]\d{6}|^\d
  * `position` is the order of appearance; earlier images win ties, and the URL breaks any remaining tie.
  */
 export function classifyCandidate({ url, alt = '', origin = 'readme', position = 0, linked = false, linkOnly = false }) {
+  if (url.includes('\uFFFD') || /%EF%BF%BD/i.test(url)) return { reject: 'malformed character reference in the image URL' };
   let parsed;
   try {
     parsed = new URL(url);
@@ -362,8 +374,35 @@ export function readImageInfo(bytes) {
 /** A failure of the build itself (bad catalog, bad configuration, unwritable output, a bug), as opposed to a recoverable lookup failure. */
 export class PipelineError extends Error {}
 
+/** Rejects when `signal` aborts first; used so a slow DNS answer counts against the request timeout. */
+function abortable(promise, signal) {
+  return new Promise((resolve, reject) => {
+    const abort = () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' }));
+    if (signal.aborted) return abort();
+    signal.addEventListener('abort', abort, { once: true });
+    promise.then(resolve, reject);
+    return undefined;
+  });
+}
+
+/**
+ * Every request of the build goes through `get`, and every attempt (each retry and each redirect hop) first passes
+ * `vetDestination` (see safe-network.mjs): http(s) only, no credentials, and every address of the host must be public.
+ * The default transport then connects only to the validated addresses.
+ *
+ * Options that exist for tests only:
+ *   - `allowPrivateHosts`: also accepts loopback addresses (the local fixture servers). Other private, link-local,
+ *     multicast and reserved ranges stay refused. Production and ordinary local builds never set it.
+ *   - `fetchImpl`: replaces the transport with a fetch-like function to simulate network failures. It is not pinned and
+ *     host names are not resolved, so it must never be used outside tests; IP literals and URL rules still apply.
+ *   - `transport(url, { headers, signal, addresses })` and `resolve(hostname)`: stand-ins for the pinned connection and
+ *     the DNS lookup, used to test the policy without real DNS. They run after / instead of the matching default step.
+ */
 export function createHttp({
-  fetchImpl = globalThis.fetch,
+  fetchImpl = null,
+  transport = null,
+  resolve = null,
+  tlsOptions = {},
   timeoutMs = 15_000,
   retries = 2,
   retryDelayMs = 400,
@@ -372,24 +411,34 @@ export function createHttp({
   apiReserve = 5,
   offlineAfter = 4,
   deadline = Infinity,
+  maxRedirects = 5,
+  maxRequests = 2_000,
   allowPrivateHosts = false,
   log = () => {},
 } = {}) {
-  const state = { requests: 0, apiRequests: 0, consecutiveNetworkFailures: 0, offline: false, apiExhausted: false, limitedHosts: new Set() };
+  const state = { requests: 0, apiRequests: 0, blocked: 0, consecutiveNetworkFailures: 0, offline: false, apiExhausted: false, limitedHosts: new Set(), refused: new Set() };
+  const resolver = resolve ?? (fetchImpl ? null : resolveHost);
+  const send = transport
+    ?? (fetchImpl
+      ? (url, init) => fetchImpl(url.href, { headers: init.headers, redirect: 'manual', signal: init.signal })
+      : (url, init) => pinnedGet(url, { ...init, tlsOptions }));
 
+  /** GET with manual redirects. A result carries the final response URL (`url`), which relative links must resolve against. */
   async function get(url, { accept = '*/*', maxBytes = LIMITS.maxTextBytes, stopAfter = Infinity } = {}) {
     let current = url;
-    for (let hop = 0; hop <= 5; hop += 1) {
+    for (let hop = 0; hop <= maxRedirects; hop += 1) {
       const result = await attempt(current, { accept, maxBytes, stopAfter });
-      if (result.redirect) {
-        const next = normalizeImageUrl(new URL(result.redirect, current).href, { allowPrivateHosts, allowSigned: true });
-        if (!next.url) return { ok: false, status: 0, transient: false, reason: `redirect rejected: ${next.reason}` };
-        current = next.url;
-        continue;
+      if (!result.redirect) return { ...result, url: current };
+      let next;
+      try {
+        next = new URL(result.redirect, current);
+      } catch {
+        return { ok: false, status: 0, transient: false, url: current, reason: `malformed redirect Location ${JSON.stringify(result.redirect.slice(0, 120))}` };
       }
-      return result;
+      next.hash = '';
+      current = next.href; // checked like any other request when the next attempt starts
     }
-    return { ok: false, status: 0, transient: false, reason: 'too many redirects' };
+    return { ok: false, status: 0, transient: false, url: current, reason: 'too many redirects' };
   }
 
   async function attempt(url, { accept, maxBytes, stopAfter }) {
@@ -404,6 +453,7 @@ export function createHttp({
     for (let tries = 0; ; tries += 1) {
       if (state.offline) return { ok: false, status: 0, transient: true, reason: 'network unavailable' };
       if (Date.now() > deadline) return { ok: false, status: 0, transient: true, reason: 'build time budget used' };
+      if (state.requests >= maxRequests) return { ok: false, status: 0, transient: true, reason: 'request limit reached' };
       if (state.limitedHosts.has(host)) return { ok: false, status: 429, transient: true, reason: `rate-limited by ${host}` };
       if (isApi && state.apiExhausted) return { ok: false, status: 403, transient: true, reason: 'GitHub API budget used' };
       const headers = { 'user-agent': USER_AGENT, accept };
@@ -411,12 +461,13 @@ export function createHttp({
         headers['x-github-api-version'] = '2022-11-28';
         if (githubToken) headers.authorization = `Bearer ${githubToken}`; // sent to the API origin only
       }
-      state.requests += 1;
-      if (isApi) state.apiRequests += 1;
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
-        const response = await fetchImpl(url, { headers, redirect: 'manual', signal: controller.signal });
+        const addresses = await abortable(vetDestination(parsedUrl, { allowLoopback: allowPrivateHosts, resolve: resolver }), controller.signal);
+        state.requests += 1;
+        if (isApi) state.apiRequests += 1;
+        const response = await send(parsedUrl, { headers, signal: controller.signal, addresses });
         state.consecutiveNetworkFailures = 0;
         if (isApi) {
           const remaining = Number(response.headers.get('x-ratelimit-remaining'));
@@ -455,13 +506,29 @@ export function createHttp({
         const { body, truncated } = await readBody(response, declaredLength === null ? maxBytes : Math.min(stopAfter, maxBytes));
         return { ok: true, status: response.status, headers: response.headers, body, truncated, declaredLength };
       } catch (error) {
+        if (error instanceof BlockedDestinationError) {
+          // Refused before any connection was made. Not a network failure and not worth retrying.
+          state.blocked += 1;
+          if (!state.refused.has(url)) {
+            state.refused.add(url);
+            log(`request refused, ${error.message}: ${url}`);
+          }
+          return { ok: false, status: 0, transient: false, blocked: true, reason: `destination not allowed (${error.message})` };
+        }
+        if (error instanceof InvalidResponseError) {
+          // A server answered, so the network is up; the answer was not valid HTTP. Like a server error it is transient
+          // (an earlier result is kept), but retrying the same server would not help and it says nothing about other hosts.
+          state.consecutiveNetworkFailures = 0;
+          log(`${host} sent an invalid HTTP response (${error.message}): ${url}`);
+          return { ok: false, status: 0, transient: true, reason: `invalid HTTP response (${error.message})` };
+        }
         state.consecutiveNetworkFailures += 1;
         if (state.consecutiveNetworkFailures >= offlineAfter) {
           state.offline = true;
           log('network appears to be unavailable; skipping remaining lookups');
         }
         if (tries < retries && !state.offline) { await sleep(retryDelayMs * 2 ** tries); continue; }
-        return { ok: false, status: 0, transient: true, reason: error?.name === 'AbortError' ? 'timeout' : `network error (${error?.cause?.code ?? error?.message ?? 'unknown'})` };
+        return { ok: false, status: 0, transient: true, reason: error?.name === 'AbortError' ? 'timeout' : `network error (${error?.cause?.code ?? error?.code ?? error?.message ?? 'unknown'})` };
       } finally {
         clearTimeout(timer);
       }
@@ -589,7 +656,7 @@ async function tryHint(directive, target, ctx) {
   } catch { /* handled below */ }
   if (!Array.isArray(entries)) return { reason: 'the hint is not a directory' };
   const candidates = entries
-    .filter((entry) => entry.type === 'file' && IMAGE_EXTENSIONS.test(entry.name) && (!entry.size || (entry.size <= LIMITS.maxImageBytes && entry.size >= 1024)))
+    .filter((entry) => entry && entry.type === 'file' && typeof entry.name === 'string' && typeof entry.path === 'string' && IMAGE_EXTENSIONS.test(entry.name) && (!entry.size || (entry.size <= LIMITS.maxImageBytes && entry.size >= 1024)))
     .sort((a, b) => (a.name < b.name ? -1 : 1))
     .slice(0, 50)
     .map((entry, position) => ({ url: `${rawRoot}/${encodePath(entry.path)}`, alt: fileStem(entry.name).replace(/[-_]+/g, ' '), position, origin: 'hint' }));
@@ -649,7 +716,8 @@ async function pickFirstValid(http, candidates, rejected, flags) {
 
 async function fetchText(http, url, accept) {
   const result = await http.get(url, { accept, maxBytes: LIMITS.maxTextBytes });
-  return result.ok ? { text: result.body.toString('utf8'), contentType: result.headers.get('content-type') ?? '' } : { failed: result };
+  // `url` is where the answer really came from (after redirects); relative links in it resolve against that.
+  return result.ok ? { text: result.body.toString('utf8'), contentType: result.headers.get('content-type') ?? '', url: result.url } : { failed: result };
 }
 
 function readmeCandidates(images, { base, owner, repo, branch, endpoints, allowPrivateHosts }) {
@@ -711,8 +779,9 @@ async function discoverGithub(project, target, ctx, rejected, flags) {
     if (tree.ok) {
       let entries = [];
       try {
-        entries = JSON.parse(tree.body.toString('utf8')).tree ?? [];
-      } catch { /* ignore */ }
+        const parsed = JSON.parse(tree.body.toString('utf8'));
+        entries = Array.isArray(parsed?.tree) ? parsed.tree : [];
+      } catch { /* an unreadable listing is no listing */ }
       const candidates = treeCandidates(entries, directory).map((candidate, position) => ({ ...candidate, url: `${rawRoot}/${encodePath(candidate.path)}`, position, origin: 'docs' }));
       const image = await pickFirstValid(http, candidates, rejected, flags);
       if (image) return { source: 'github-docs', image };
@@ -729,7 +798,7 @@ async function discoverGithub(project, target, ctx, rejected, flags) {
     if (page.failed) {
       if (page.failed.transient) flags.transient = true;
     } else {
-      const social = extractHtmlImages(page.text, `${endpoints.githubWeb}/${owner}/${repo}`)
+      const social = extractHtmlImages(page.text, page.url)
         .filter((candidate) => candidate.origin === 'og')
         .map((candidate, position) => ({ ...candidate, position }))
         .filter((candidate) => {
@@ -752,7 +821,7 @@ const STRONG_WORDS = new Set([...PHOTO_WORDS, ...SCREEN_WORDS, 'presto']);
 export function treeCandidates(entries, directory = '') {
   const base = directory ? `${directory}/` : '';
   return entries
-    .filter((entry) => entry.type === 'blob' && IMAGE_EXTENSIONS.test(entry.path) && entry.path.startsWith(base))
+    .filter((entry) => entry && entry.type === 'blob' && typeof entry.path === 'string' && IMAGE_EXTENSIONS.test(entry.path) && entry.path.startsWith(base))
     .filter((entry) => !entry.size || (entry.size <= LIMITS.maxImageBytes && entry.size >= 4096))
     .map((entry) => ({ path: entry.path, relative: entry.path.slice(base.length) }))
     .filter(({ relative }) => {
@@ -774,7 +843,7 @@ function siteDefaultImage(ctx, origin) {
       const root = `${origin}/`;
       const page = await fetchText(ctx.http, root, 'text/html');
       if (page.failed) return null;
-      const first = extractHtmlImages(page.text, root).find((candidate) => candidate.origin === 'og');
+      const first = extractHtmlImages(page.text, page.url).find((candidate) => candidate.origin === 'og');
       return first ? new URL(first.url).pathname : null;
     })());
   }
@@ -793,10 +862,11 @@ async function discoverWeb(project, target, ctx, rejected, flags) {
     return null;
   }
   const candidates = [];
-  const all = extractHtmlImages(page.text, target.url.href);
-  const isFrontPage = `${target.url.origin}/` === target.url.href;
-  const defaultPath = isFrontPage ? all.find((candidate) => candidate.origin === 'og')?.url : await siteDefaultImage(ctx, target.url.origin);
-  const defaultImage = defaultPath ? new URL(defaultPath, target.url.origin).pathname : null;
+  const pageUrl = new URL(page.url); // the page that answered, after any redirects: its relative image links resolve against this
+  const all = extractHtmlImages(page.text, pageUrl.href);
+  const isFrontPage = `${pageUrl.origin}/` === pageUrl.href;
+  const defaultPath = isFrontPage ? all.find((candidate) => candidate.origin === 'og')?.url : await siteDefaultImage(ctx, pageUrl.origin);
+  const defaultImage = defaultPath ? new URL(defaultPath, pageUrl.origin).pathname : null;
   all.forEach((candidate, position) => {
     const normalized = normalizeImageUrl(candidate.url, { allowPrivateHosts: ctx.allowPrivateHosts });
     if (!normalized.url) {
@@ -938,6 +1008,8 @@ export async function updateCache(catalog, previous, options = {}) {
         const project = queue[next++];
         const result = await discoverProject(project, ctx);
         const old = previous.entries[project.id];
+        // Malformed external data (a bad URL, redirect or character reference) is skipped, never fatal, but never silent.
+        for (const item of result.rejected) if (/malformed/i.test(item.reason)) options.log?.(`"${project.title}": ${item.reason} <${item.url}>`);
         if (result.status === 'error') {
           options.log?.(`image lookup incomplete for "${project.title}": ${result.directive?.reason ?? result.rejected[0]?.reason ?? 'temporary failure'}`);
           if (old && old.fingerprint === fingerprint(project)) { cache.entries[project.id] = old; stats.stale += 1; }
@@ -956,6 +1028,7 @@ export async function updateCache(catalog, previous, options = {}) {
     };
     await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, worker));
     stats.requests = http.state.requests;
+    stats.blocked = http.state.blocked;
     stats.apiRequests = http.state.apiRequests;
     stats.networkUnavailable = http.state.offline;
     stats.rateLimited = http.state.limitedHosts.size > 0 || http.state.apiExhausted;

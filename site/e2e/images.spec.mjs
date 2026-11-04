@@ -143,7 +143,7 @@ test('search, filters and sorting keep each image with its own card', async ({ p
   const imageOf = (title) => card(page, title).locator('img.card-image').getAttribute('src');
   const before = await imageOf('Fixture With Image');
   await page.locator('#project-search').fill('Fixture');
-  await expect(visibleCards(page)).toHaveCount(9);
+  await expect(visibleCards(page)).toHaveCount(catalog.projects.filter((project) => project.title.startsWith('Fixture')).length);
   await page.locator('#sort-projects').selectOption('category');
   await page.locator('button[data-category="other"]').click();
   expect(await imageOf('Fixture With Image')).toBe(before);

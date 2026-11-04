@@ -7,7 +7,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { filterAndSortCards, renderResultCount } from '../src/scripts/catalog-controls.js';
-import { outDir } from '../site-config.mjs';
+import { coffeeUrl, outDir, repositoryUrl, sponsorsUrl } from '../site-config.mjs';
 
 const siteDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repositoryRoot = path.resolve(siteDirectory, '..');
@@ -237,3 +237,84 @@ test('no generated catalog JSON can be tracked by Git', () => {
   const ignored = spawnSync('git', ['check-ignore', 'site/src/data/catalog.json', 'site/scripts/src/data/catalog.json'], { cwd: repositoryRoot, encoding: 'utf8' });
   assert.equal(ignored.stdout.trim().split(/\r?\n/).length, 2);
 });
+
+// Support and sponsorship. The destinations are plain links, identical in the gallery, the README and FUNDING.yml.
+const AWESOME_LIST = 'https://github.com/jake1164/awesome-Pimoroni-Presto';
+const SPONSORS = 'https://github.com/sponsors/jake1164';
+const COFFEE = 'https://buymeacoffee.com/jake1164s';
+const hrefsIn = (html) => [...html.matchAll(/<a\b[^>]*\shref="([^"]+)"/g)].map((match) => match[1]);
+
+test('the support destinations are the verified ones', () => {
+  assert.equal(sponsorsUrl, SPONSORS);
+  assert.equal(coffeeUrl, COFFEE);
+  // Builds in a fork or with GITHUB_REPOSITORY set follow that repository; the default is this list.
+  if (!process.env.GITHUB_REPOSITORY) assert.equal(repositoryUrl, AWESOME_LIST);
+});
+
+test('built page links the header Star action to the list and offers all three support actions', async () => {
+  const html = await readFile(path.join(outDir, 'index.html'), 'utf8');
+  const header = html.match(/<header class="panel-header">[\s\S]*?<\/header>/)?.[0] ?? '';
+  const star = header.match(/<a class="star-repo"[^>]*>/)?.[0] ?? '';
+  assert.ok(star, 'header must contain the Star action');
+  assert.ok(star.includes(`href="${repositoryUrl}"`), 'the header Star action must point to the list itself');
+  assert.match(star, /rel="noopener noreferrer"/);
+  assert.match(header, /Star<\/span><span class="visually-hidden"> Awesome Presto on GitHub</);
+
+  const support = html.match(/<section class="support"[\s\S]*?<\/section>/)?.[0] ?? '';
+  assert.match(support, /<h2 id="support-heading">Support this list<\/h2>/);
+  assert.match(support, /aria-labelledby="support-heading"/);
+  assert.match(support, /never affects which projects are listed/);
+  assert.deepEqual(hrefsIn(support), [repositoryUrl, SPONSORS, COFFEE]);
+  for (const label of ['Star on GitHub', 'GitHub Sponsors', 'Buy Me a Coffee']) assert.match(support, new RegExp(`${label}\\s*</a>`));
+  // The support links are not project links: no card links to a sponsor or coffee page.
+  const cards = html.match(/<li\s+class="project-card"[\s\S]*?<\/li>/g) ?? [];
+  assert.ok(cards.length > 0);
+  for (const card of cards) {
+    for (const href of hrefsIn(card)) assert.ok(![SPONSORS, COFFEE].includes(href), `a card links to ${href}`);
+  }
+});
+
+test('support adds no scripts, frames, widgets, tracking pixels or third-party images', async () => {
+  const html = await readFile(path.join(outDir, 'index.html'), 'utf8');
+  const support = html.match(/<section class="support"[\s\S]*?<\/section>/)?.[0] ?? '';
+  assert.ok(support);
+  assert.doesNotMatch(support, /<(img|script|iframe|link|style|object|embed|form)\b/i);
+  assert.doesNotMatch(html, /<iframe\b|<object\b|<embed\b/i);
+  assert.doesNotMatch(html, /cdn\.buymeacoffee|buymeacoffee\.com\/(widget|bmc)|bmc-button|bmc-widget|googletagmanager|google-analytics|gtag\(|ko-fi|paypal\.com\/sdk/i);
+  // Every script on the page is the site's own bundled file or inline module; none loads from another origin.
+  for (const tag of html.match(/<script\b[^>]*>/g) ?? []) assert.doesNotMatch(tag, /\ssrc="(?:https?:)?\/\//i, tag);
+});
+
+test('FUNDING.yml configures GitHub Sponsors and Buy Me a Coffee exactly, and nothing else', async () => {
+  const file = path.join(repositoryRoot, '.github', 'FUNDING.yml');
+  assert.ok(existsSync(file), '.github/FUNDING.yml must exist (exact name)');
+  const lines = (await readFile(file, 'utf8')).split(/\r?\n/).filter((line) => line.trim() !== '' && !line.trim().startsWith('#'));
+  assert.deepEqual(lines, ['github: [jake1164]', 'custom:', `  - ${COFFEE}`]);
+  assert.deepEqual((await readdir(path.join(repositoryRoot, '.github'))).filter((name) => /funding/i.test(name)), ['FUNDING.yml']);
+  assert.ok(!existsSync(path.join(repositoryRoot, 'FUNDING.yml')) && !existsSync(path.join(repositoryRoot, 'docs', 'FUNDING.yml')));
+});
+
+test('README, FUNDING.yml and the website agree on the support destinations', async () => {
+  const readme = await readFile(path.join(repositoryRoot, 'README.md'), 'utf8');
+  const funding = await readFile(path.join(repositoryRoot, '.github', 'FUNDING.yml'), 'utf8');
+  const html = await readFile(path.join(outDir, 'index.html'), 'utf8');
+  const section = readme.match(/^### Support this project$[\s\S]*?(?=^### )/m)?.[0] ?? '';
+  assert.ok(section, 'README keeps its "Support this project" section');
+  // The introductory link resolves to that heading.
+  assert.match(readme, /\[Support this list\]\(#support-this-project\)/);
+  assert.match(section, /star/i);
+  assert.match(section, /never affects which projects are listed/);
+  // Both buttons link to the verified destinations at the same height, with alt text and a local or HTTPS image.
+  const buttons = [...section.matchAll(/<a href="([^"]+)"><img src="([^"]+)" alt="([^"]+)" height="(\d+)"><\/a>/g)];
+  assert.deepEqual(buttons.map((button) => button[1]), [SPONSORS, COFFEE]);
+  assert.equal(new Set(buttons.map((button) => button[4])).size, 1, 'the two buttons must have the same height');
+  assert.ok(buttons.every((button) => button[3].trim() !== ''));
+  assert.deepEqual(buttons.map((button) => button[2]).filter((source) => !/^https:\/\//.test(source)), ['assets/sponsor-github.svg']);
+  assert.ok(existsSync(path.join(repositoryRoot, 'assets', 'sponsor-github.svg')));
+  // The README keeps a single copy of the section, FUNDING.yml names the same account, and the website the same links.
+  assert.equal((readme.match(/^#{1,6} Support this project$/gm) ?? []).length, 1);
+  assert.ok(funding.includes(`[${SPONSORS.split('/').pop()}]`) && funding.includes(COFFEE));
+  const site = hrefsIn(html);
+  for (const destination of [SPONSORS, COFFEE]) assert.ok(site.includes(destination), `website must link ${destination}`);
+});
+

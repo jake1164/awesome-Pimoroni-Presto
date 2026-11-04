@@ -44,6 +44,9 @@ To guide or override the choice, end your entry with **one** HTML comment (after
 
 Without a comment, discovery is fully automatic. Use at most one comment per entry; unknown or malformed ones fail the README check with the line to fix. If a hint or URL cannot be used, the site falls back to automatic selection (or the icon) and still builds. An unwanted or wrong image is corrected by changing your entry, or your own README, never site files. Details and limits: [site/README.md](site/README.md#project-images). The pull request template repeats these examples.
 
+## GitHub star counts
+If your project links to a GitHub repository (the repository itself, or a file or folder in it), its card shows the repository's star count automatically; the website reads it from GitHub when it is built and refreshes it at least weekly. You do not enter, update or approve anything, and the count never appears in `README.md`. Links to gists, profiles, issues or other sites simply show no count. Details: [site/README.md](site/README.md#github-star-counts).
+
 ## Badges
 We use simple badges to help readers spot new items. An entry has at most one:
 

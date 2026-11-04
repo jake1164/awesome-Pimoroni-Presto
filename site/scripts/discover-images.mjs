@@ -105,6 +105,8 @@ async function writeCache(cache) {
 
 async function main() {
   const config = configuration();
+  // Test fixtures only: lets the build reach local fixture servers. Only loopback is opened; private networks stay refused.
+  if (config.allowPrivateHosts) console.log('PRESTO_IMAGE_ALLOW_LOCAL=1: loopback addresses are reachable (test fixtures only)');
   const catalog = await readCatalog();
   const previous = await readCache();
   const http = createHttp({

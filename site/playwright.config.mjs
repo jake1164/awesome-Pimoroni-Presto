@@ -2,9 +2,10 @@ import { defineConfig, devices } from '@playwright/test';
 import { base } from './site-config.mjs';
 
 // Tests run against the production build (`npm run build`) served by `astro preview`.
-// Port 4321 is avoided because Windows can reserve it; override with PRESTO_E2E_PORT.
+// Port 4321 is avoided because Windows can reserve it; override with PRESTO_E2E_PORT. The server is started with
+// node directly, not through `npm run preview -- --port N`: npm's argument forwarding is unreliable on some Windows setups.
 // A second site, built from a synthetic README into `.synthetic/` with a local stand-in for GitHub (no network),
-// serves e2e/all-category.spec.mjs and e2e/images.spec.mjs.
+// serves e2e/all-category.spec.mjs, e2e/images.spec.mjs and e2e/stars.spec.mjs.
 const port = Number(process.env.PRESTO_E2E_PORT ?? 8765);
 const syntheticPort = Number(process.env.PRESTO_E2E_SYNTHETIC_PORT ?? 8772);
 const root = base.replace(/\/$/, '');
@@ -19,39 +20,40 @@ export default defineConfig({
   projects: [
     {
       name: 'desktop',
-      testIgnore: /all-category|images\.spec/,
+      testIgnore: /all-category|images\.spec|stars\.spec/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 }, baseURL: urlFor(port) },
     },
     {
       name: 'mobile',
-      testIgnore: /all-category|images\.spec/,
+      testIgnore: /all-category|images\.spec|stars\.spec/,
       use: { ...devices['Pixel 7'], baseURL: urlFor(port) },
     },
     {
       name: 'synthetic',
-      testMatch: /(all-category|images)\.spec\.mjs/,
+      testMatch: /(all-category|images|stars)\.spec\.mjs/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 }, baseURL: urlFor(syntheticPort) },
     },
     {
       name: 'synthetic-mobile',
-      testMatch: /images\.spec\.mjs/,
+      testMatch: /(images|stars)\.spec\.mjs/,
       use: { ...devices['Pixel 7'], baseURL: urlFor(syntheticPort) },
     },
   ],
   webServer: [
     {
-      command: `npm run preview -- --host 127.0.0.1 --port ${port}`,
+      command: `node node_modules/astro/astro.js preview --host 127.0.0.1 --port ${port}`,
       url: urlFor(port),
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
     },
-    {
+    // e2e/readme-variants.mjs builds the real-site tests' site from changed READMEs and has no use for the synthetic site.
+    ...(process.env.PRESTO_E2E_VARIANT ? [] : [{
       // Builds the synthetic site (README, local stand-in for GitHub, discovery, Astro) and serves it; see the script.
       command: 'node e2e/synthetic-site.mjs',
       url: urlFor(syntheticPort),
       reuseExistingServer: false,
       timeout: 180_000,
       env: { PRESTO_E2E_SYNTHETIC_PORT: String(syntheticPort) },
-    },
+    }]),
   ],
 });
