@@ -5,7 +5,8 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const workflowText = () => readFile(path.join(root, '.github', 'workflows', 'pages.yml'), 'utf8');
+// A fresh Windows checkout (Git's default core.autocrlf=true) has CRLF line endings; the patterns below assume LF.
+const workflowText = async () => (await readFile(path.join(root, '.github', 'workflows', 'pages.yml'), 'utf8')).replace(/\r\n/g, '\n');
 
 function job(workflow, name) {
   const match = workflow.match(new RegExp(`^  ${name}:\\n([\\s\\S]*?)(?=^  [a-z-]+:\\n|(?![\\s\\S]))`, 'm'));

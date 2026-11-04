@@ -47,6 +47,11 @@ Without a comment, discovery is fully automatic. Use at most one comment per ent
 ## GitHub star counts
 If your project links to a GitHub repository (the repository itself, or a file or folder in it), its card shows the repository's star count automatically; the website reads it from GitHub when it is built and refreshes it at least weekly. You do not enter, update or approve anything, and the count never appears in `README.md`. Links to gists, profiles, issues or other sites simply show no count. Details: [site/README.md](site/README.md#github-star-counts).
 
+## Suggest a project or report a problem
+- **Suggest a project:** open a pull request that adds one line to `README.md` (see above). If you would rather not edit the file, [open an issue](https://github.com/jake1164/awesome-Pimoroni-Presto/issues) with the link and a one-line description, and the maintainer can add it.
+- **Report a problem** (a dead link, a wrong description, an unwanted or wrong card image, a problem on the website): [open an issue](https://github.com/jake1164/awesome-Pimoroni-Presto/issues) that says what you saw and where. A pull request is even better, because the list, descriptions and card images are all corrected by editing the project's line in `README.md`; the website is rebuilt from it automatically.
+- Please do not put personal information in an issue or pull request.
+
 ## Badges
 We use simple badges to help readers spot new items. An entry has at most one:
 
