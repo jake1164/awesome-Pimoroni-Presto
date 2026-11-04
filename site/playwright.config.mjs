@@ -43,7 +43,9 @@ export default defineConfig({
     {
       command: `node node_modules/astro/astro.js preview --host 127.0.0.1 --port ${port}`,
       url: urlFor(port),
-      reuseExistingServer: !process.env.CI,
+      // PRESTO_E2E_FRESH_SERVERS=1 refuses to reuse a server already listening on the port (a stale preview of an older build
+      // would silently be tested instead), so the run fails loudly instead of passing or failing for the wrong reason.
+      reuseExistingServer: !process.env.CI && !process.env.PRESTO_E2E_FRESH_SERVERS,
       timeout: 60_000,
     },
     // e2e/readme-variants.mjs builds the real-site tests' site from changed READMEs and has no use for the synthetic site.

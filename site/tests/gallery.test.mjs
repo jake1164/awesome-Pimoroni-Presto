@@ -285,6 +285,36 @@ test('support adds no scripts, frames, widgets, tracking pixels or third-party i
   for (const tag of html.match(/<script\b[^>]*>/g) ?? []) assert.doesNotMatch(tag, /\ssrc="(?:https?:)?\/\//i, tag);
 });
 
+test('analytics is consent-gated and exposes persistent privacy settings', async () => {
+  const html = await readFile(path.join(outDir, 'index.html'), 'utf8');
+  const analytics = await readFile(path.join(repositoryRoot, 'site', 'src', 'scripts', 'analytics.js'), 'utf8');
+  assert.match(html, /id="consent-banner"[^>]*hidden/);
+  assert.match(html, /id="consent-allow"[^>]*>Allow analytics</);
+  assert.match(html, /id="consent-decline"[^>]*>No thanks</);
+  assert.match(html, /id="privacy-settings"[^>]*>Privacy \/ Analytics settings</);
+  assert.match(analytics, /G-K5XSTX64R3/);
+  assert.doesNotMatch(html, /<script[^>]+src="https:\/\/www\.googletagmanager\.com/);
+  // Nothing of Google is in the shipped HTML or its stylesheet; the library is only ever added by the consent code.
+  assert.doesNotMatch(html, /googletagmanager|google-analytics|gtag/i);
+  // Both controls ship hidden and are revealed only on the live site; the banner comes first so keyboard users reach it first.
+  assert.match(html, /id="privacy-footer"[^>]*hidden/);
+  assert.ok(html.indexOf('id="consent-banner"') < html.indexOf('<main'), 'the consent banner precedes the page content');
+  // The consent text says what Google Analytics is, in plain words: pseudonymous (not anonymous), cookies, device information,
+  // optional, changeable, and that withdrawing is not a recall of what was sent or of what is already waiting to be sent.
+  const banner = html.match(/<section class="consent-banner"[\s\S]*?<\/section>/)?.[0] ?? '';
+  assert.match(banner, /With your permission, we use Google Analytics to understand how visitors use this project gallery\./);
+  assert.match(banner, /Google Analytics uses cookies and pseudonymous identifiers and may collect browser and device information\./);
+  assert.match(banner, /We never send your gallery search text as a custom event\./);
+  assert.match(banner, /Analytics is optional, and you can change your choice at any time/);
+  assert.match(banner, /does not delete data already sent, and a few events already waiting to be sent may still go out within seconds/);
+  assert.doesNotMatch(html.replace(/<style[\s\S]*?<\/style>/g, ''), /anonymous|anonymised|no personal/i, 'no claim of anonymity anywhere on the page');
+  // The support links carry the support type the analytics event reports.
+  const types = [...html.matchAll(/data-support="([a-z_]+)" data-placement="([a-z]+)"/g)].map((match) => `${match[1]}:${match[2]}`);
+  assert.deepEqual(types, ['star:header', 'star:footer', 'github_sponsors:footer', 'buy_me_a_coffee:footer']);
+  // Support links and project links are the only outbound links reported; project stars are not support.
+  assert.equal((html.match(/class="star-link"[^>]*data-support/g) ?? []).length, 0);
+});
+
 test('FUNDING.yml configures GitHub Sponsors and Buy Me a Coffee exactly, and nothing else', async () => {
   const file = path.join(repositoryRoot, '.github', 'FUNDING.yml');
   assert.ok(existsSync(file), '.github/FUNDING.yml must exist (exact name)');

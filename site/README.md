@@ -103,7 +103,7 @@ Malformed data from the outside (an invalid character reference such as `&#11141
 
 The page uses the **original image URL**; nothing is downloaded into the repository or hosted by the gallery. Each card has a fixed-height preview box with the category icon already in it. The `<img>` is positioned over the icon with `loading="lazy"`, `decoding="async"`, explicit `width`/`height`, `referrerpolicy="no-referrer"` and `object-fit: contain`, so an image of any size or shape cannot change the card. If it fails to load, a small script hides it and the icon stays. Cards without an image look identical in size and behaviour.
 
-**Remote hosting and privacy.** These images are not first-party resources. A visitor's browser requests them from GitHub, Pimoroni, the forum CDN or whichever host the author uses, so that host sees the visitor's IP address and browser details (but not the gallery URL, because of `no-referrer`). Images stay the authors' property; the gallery only embeds what they already publish. The gallery page itself has no scripts, fonts or analytics from other origins; the browser tests fail if anything other than an image is requested from another origin. A remote image can change or disappear after the build, see below.
+**Remote hosting and privacy.** These images are not first-party resources. A visitor's browser requests them from GitHub, Pimoroni, the forum CDN or whichever host the author uses, so that host sees the visitor's IP address and browser details (but not the gallery URL, because of `no-referrer`). Images stay the authors' property; the gallery only embeds what they already publish. The gallery page itself loads no fonts and no third-party scripts, except Google Analytics after a visitor opts in on the live site (see **Analytics and privacy**); on every other origin, and for every visitor who has not opted in, the browser tests fail if anything other than an image is requested from another origin. A remote image can change or disappear after the build, see below.
 
 ### Cache
 
@@ -186,6 +186,66 @@ PRESTO_GITHUB_STARS=off npm run build     # build from the cache only, no networ
 ```
 
 Arguments are passed to `node` directly because `npm run <script> -- <args>` is not reliable on every Windows setup. The unit tests (`tests/stars.test.mjs`) cover URL classification and repository extraction (files, directories, duplicates, gists, profiles, issues, malformed URLs), valid, missing, malformed and unavailable answers, API failures, rate limits, a down network, cache hits, expiry at exactly 24 hours, recovery from damaged caches, sorting with missing counts, card rendering of the built page, README-only additions and a catalog that is byte-identical with or without star data, against a local fixture server; they never use the network. `tests/dev-server.test.mjs` covers the Windows-safe development startup.
+
+## Analytics and privacy
+
+The live site can measure how it is used with Google Analytics 4 (measurement ID `G-K5XSTX64R3`). It is off unless the visitor turns it on, and it runs only on the live page. Google Analytics is not anonymous: it uses cookies and pseudonymous identifiers and may collect browser and device information. The banner says so, in those words.
+
+**Consent.** The first visit shows a banner (Allow analytics / No thanks). Until "Allow analytics" is pressed the page makes no Google request, loads no Google script, sets no cookie and creates no `dataLayer`. "Privacy / Analytics settings" at the bottom of the page reopens the banner so the choice can be changed at any time. A missing, malformed or unknown stored value is treated as "no consent".
+
+**Where it runs.** Only on the exact page `https://jake1164.github.io/awesome-Pimoroni-Presto/` (constants in `src/scripts/analytics.js`, checked against `site-config.mjs` by `tests/analytics.test.mjs`). `localhost`, `astro preview`, nested paths such as `/awesome-Pimoroni-Presto/preview/`, `/index.html`, sibling paths, forks, other hosts and the automated tests never load Google, whatever is stored in the browser, and the banner and settings control stay hidden there.
+
+**What Google is told about the page.** `page_location` is pinned to the canonical page URL (no query string, no fragment) and `page_referrer` to the referrer's origin (`https://example.org/`, or nothing). Google's library also has an automatic "site search" feature that reads the address bar's query string itself (it ignores `page_location`), so when analytics is about to load the page removes the query string from the address bar (the fragment stays). The gallery uses no query parameters; the side effect is that campaign tags such as `utm_source` are not seen by Google either. Custom event parameters never hold free text or addresses (table below).
+
+**Several tabs, one choice.** The choice lives in `localStorage` (`presto-analytics-consent`: `granted` or `denied`). Every open tab re-reads it when the browser's `storage` event arrives, when the tab becomes visible again, and before it sends any custom event. Withdrawing in one tab therefore switches the others off as soon as they receive the event (browsers deliver it asynchronously, so not before): their events stop, `ga-disable` is set, consent is updated, their cookies are removed and their banner and status update. Granting in another tab switches a waiting tab on without loading the library twice or sending a second page view.
+
+**Events** (all sent only while analytics is on and consent stands in storage; events requested earlier are dropped, never queued or replayed):
+
+| Event | Parameters | When |
+| --- | --- | --- |
+| `page_view` | `page_location`, `page_referrer` (sanitized, see above) | once per page load, when analytics first turns on |
+| `search_used` | none | once when a search starts (empty to non-empty); never the text |
+| `category_selected` | `category`: the category slug, or `_all` | the selected category changes |
+| `sort_changed` | `sort_by`: `name`, `category` or `stars` | the sort changes |
+| `badge_filter_changed` | `badge`: `NEW` or `RECENT`; `enabled`: `true` or `false` | a badge filter is toggled |
+| `project_opened` | `project_id`: the stable catalog ID; `category`: slug | the "Visit project" link or a link inside the project's description (a live demo, a forum thread) is used by click, keyboard or middle click; never the address |
+| `support_click` | `support_type`: `star`, `github_sponsors` or `buy_me_a_coffee`; `placement`: `header` or `footer` | a support link is used |
+
+A project's GitHub star count link is not a project open and not support. Clicks are not hearts or votes, and counts are events, not unique visitors.
+
+**Withdrawing.** Declining after allowing stops collection from that page: our events stop, Google's documented opt-out switch `window['ga-disable-G-K5XSTX64R3']` is set (Consent Mode alone would still let the loaded library send cookieless pings), consent is updated to denied, and the first-party `_ga`, `_ga_K5XSTX64R3` (the ID without `G-`), `_gid` and `_gat*` cookies are deleted. Allowing again in the same page load resumes events without loading the library again or sending a second page view. After a reload a withdrawn choice loads nothing.
+
+**When the browser will not store the choice.** Withdrawal always switches the current page off first. It is then written to `localStorage`; if that fails while an earlier "granted" is still readable, a per-tab denial is written to `sessionStorage` instead; and the page says which of these held, never more:
+
+| What could be stored | What the visitor is told | After a reload |
+| --- | --- | --- |
+| `localStorage` accepted the denial | "Analytics declined" | stays off, in every tab |
+| writes failed, but the old grant could be removed | "off ... would not save this choice, so you may be asked again" | the banner asks again |
+| writes and removal failed, `sessionStorage` accepted a denial | "off for this browser session ... an earlier allow may apply again in a new session" | stays off in this tab; other tabs and later sessions read the old grant |
+| nothing could be stored | "off on this page only ... an earlier allow may apply again when you reload or return" | the old grant applies again, and the page then says "Analytics allowed" so the visitor can withdraw again |
+
+The last two rows are limits of the browser, not of the page: with every write blocked nothing can revoke an earlier grant for later page loads. Nothing is stored on a server, and no extra cookie is used for the choice.
+
+**Limits.** Data Google has already received is not recalled by withdrawing. Google's library holds events for a few seconds before sending them, so an event generated just before withdrawing may still be sent in the seconds that follow; nothing generated after the withdrawal is. A loaded library stays in memory until the page is reloaded (it is silenced, not unloaded). Automatic events of the GA4 data stream cannot all be switched off in code; see **Required GA4 Console Configuration**.
+
+### Required GA4 Console Configuration
+
+Code in this repository controls what the page sends; **Google Analytics settings control what Google's own library collects by itself**. Phase 4 is not finished until the owner has done the following and verified it. (Menu names are from the GA4 Admin area at the time of writing and may move; they were not checked against the live property.)
+
+| Controlled by | What |
+| --- | --- |
+| This code | consent and its withdrawal, the production-only page gate, canonical `page_location`, origin-only `page_referrer`, the query string removed before the library loads, the seven events above and their parameters, no advertising consent, no Google signals, `send_page_view: false` with one explicit `page_view` |
+| The GA4 console | Enhanced measurement events (scroll, outbound click, site search, downloads, video, forms), data retention, Google signals, data sharing, reporting identity, any product links |
+| Neither (always on in GA4) | `user_engagement`, `first_visit`, `session_start` and Google's own device, browser and approximate-location dimensions |
+
+1. **Disable Enhanced measurement.** Admin > Data collection and modification > Data streams > the web stream for `G-K5XSTX64R3` > Enhanced measurement: switch off Scrolls, Outbound clicks, **Site search**, Video engagement, File downloads and Form interactions, and under Page views > advanced settings switch off "Page changes based on browser history events" (the page sends its own `page_view`). Simplest: turn the master Enhanced measurement toggle off. Why: the library reads these settings from Google when it loads, so they apply to the live site; during development real `gtag.js` produced `view_search_results` (with the raw `q` value), `scroll`, outbound `click` and `user_engagement` events that this repository's code cannot all suppress. The query string is now removed before the library loads, which stops site search from seeing it, but the setting should be off regardless.
+2. **Review automatic collection and reporting.** Admin > Data collection and modification > Data collection: leave Google signals data collection **off**; leave "Advanced settings to allow for ads personalization" **off**; consider switching off granular location and device data collection. Admin > Data display > Reporting identity: choose "Device-based" so the reports do not depend on Google signals.
+3. **Disable advertising features.** Admin > Product links: no Google Ads link. Admin > Data collection and modification > Data sharing settings: switch off every optional sharing toggle you do not need (Google products and services, modeling contributions, technical support, account specialists).
+4. **Set data retention.** Admin > Data collection and modification > Data retention: event data retention 2 months (the shortest) unless longer is needed, and keep "Reset user data on new activity" off.
+5. **Verify after deployment.** On the live site allow analytics, use the gallery (search, filter, sort, open a project and a description link, press each support link), then check Reports > Realtime (event count by event name) and, with the Google Analytics Debugger browser extension, Admin > DebugView. Expected: `page_view`, `user_engagement` and the custom events in the table above and nothing else; in particular **no** `scroll`, `click`, `view_search_results`, `file_download`, `video_*` or `form_*`; `page_location` shows only `https://jake1164.github.io/awesome-Pimoroni-Presto/`; no search text, query value or project address appears in any parameter. Then withdraw consent and confirm no new events arrive.
+6. **Record the result.** Once verified, record the date and what was seen in the master plan, and run `PRESTO_E2E_REQUIRE_CLEAN_GA=1 PRESTO_E2E_REAL_GTAG=1 npm run test:browser` (needs the network; every Google request is still answered locally): it fails if the real library still emits any automatic event other than `user_engagement`, because the library carries the stream's current settings.
+
+**Tests.** `tests/analytics.test.mjs` tests the consent logic against fake browsers (several tabs share a fake `localStorage`). `e2e/analytics.spec.mjs` runs on desktop and mobile Chromium with every Google request intercepted (nothing reaches Google): by default a deterministic stand-in for `gtag.js`; `PRESTO_E2E_REAL_GTAG=1 npm run test:browser` fetches Google's real `gtag.js` instead (needs the network; slower because the library batches events), and the Google requests are still answered locally. The suite uses two real tabs of one browser context for the cross-tab cases and patches `Storage` for the storage-failure cases. `PRESTO_E2E_FRESH_SERVERS=1` makes Playwright refuse to reuse a preview server already listening on the port; combine it with `PRESTO_E2E_PORT`, `PRESTO_E2E_SYNTHETIC_PORT` and `PRESTO_E2E_FIXTURE_PORT` for an isolated run.
 
 ## GitHub Pages
 

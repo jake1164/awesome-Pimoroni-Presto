@@ -44,13 +44,23 @@ const categoryIcons = Object.fromEntries(
 ---
 
 <Layout title="Awesome Presto — Explore what makers are building">
+  <section class="consent-banner" id="consent-banner" aria-labelledby="consent-heading" hidden>
+    <div>
+      <h2 id="consent-heading">Help improve this community project</h2>
+      <p>With your permission, we use Google Analytics to understand how visitors use this project gallery. Google Analytics uses cookies and pseudonymous identifiers and may collect browser and device information. We never send your gallery search text as a custom event. Analytics is optional, and you can change your choice at any time with “Privacy / Analytics settings” at the bottom of the page. Turning it off stops new collection from this page; it does not delete data already sent, and a few events already waiting to be sent may still go out within seconds.</p>
+    </div>
+    <div class="consent-actions">
+      <button class="pill consent-allow" type="button" id="consent-allow">Allow analytics</button>
+      <button class="pill consent-decline" type="button" id="consent-decline">No thanks</button>
+    </div>
+  </section>
   <main class="panel">
     <header class="panel-header">
       <div>
         <h1>Awesome Presto</h1>
         <p class="subtitle">Explore what makers are building</p>
       </div>
-      <a class="star-repo" href={repositoryUrl} target="_blank" rel="noopener noreferrer">
+      <a class="star-repo" data-support="star" data-placement="header" href={repositoryUrl} target="_blank" rel="noopener noreferrer">
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 2.5 2.9 6.1 6.6.8-4.9 4.6 1.3 6.6-5.9-3.3-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8Z"></path></svg>
         <span>Star</span><span class="visually-hidden"> Awesome Presto on GitHub</span>
       </a>
@@ -108,25 +118,30 @@ const categoryIcons = Object.fromEntries(
       <p>Enjoying Awesome Pimoroni Presto? Giving this repository a GitHub star helps other Presto owners discover it. You can also support ongoing curation and maintenance through GitHub Sponsors or Buy Me a Coffee. Support is entirely optional and never affects which projects are listed.</p>
       <ul class="support-actions" role="list">
         <li>
-          <a class="support-button" href={repositoryUrl} target="_blank" rel="noopener noreferrer">
+          <a class="support-button" data-support="star" data-placement="footer" href={repositoryUrl} target="_blank" rel="noopener noreferrer">
             <svg class="icon-star" aria-hidden="true" viewBox="0 0 24 24"><path d="m12 2.5 2.9 6.1 6.6.8-4.9 4.6 1.3 6.6-5.9-3.3-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8Z"></path></svg>
             Star on GitHub
           </a>
         </li>
         <li>
-          <a class="support-button" href={sponsorsUrl} target="_blank" rel="noopener noreferrer">
+          <a class="support-button" data-support="github_sponsors" data-placement="footer" href={sponsorsUrl} target="_blank" rel="noopener noreferrer">
             <svg class="icon-heart" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 20.5s-8-4.9-8-11a4.5 4.5 0 0 1 8-2.8 4.5 4.5 0 0 1 8 2.8c0 6.1-8 11-8 11Z"></path></svg>
             GitHub Sponsors
           </a>
         </li>
         <li>
-          <a class="support-button" href={coffeeUrl} target="_blank" rel="noopener noreferrer">
+          <a class="support-button" data-support="buy_me_a_coffee" data-placement="footer" href={coffeeUrl} target="_blank" rel="noopener noreferrer">
             <svg class="icon-coffee" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 9h13v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6Z"></path><path d="M17 10.5h1a2.5 2.5 0 0 1 0 5h-1.2"></path><path d="M8 3.5V6M12 3.5V6"></path></svg>
             Buy Me a Coffee
           </a>
         </li>
       </ul>
     </section>
+
+    <footer class="site-footer" id="privacy-footer" hidden>
+      <button class="privacy-settings" type="button" id="privacy-settings">Privacy / Analytics settings</button>
+      <span id="privacy-status" class="privacy-status" role="status" aria-live="polite"></span>
+    </footer>
   </main>
 </Layout>
 
@@ -138,6 +153,7 @@ const categoryIcons = Object.fromEntries(
 
 <script>
   import { filterAndSortCards, renderResultCount, watchCardImages } from '../scripts/catalog-controls.js';
+  import { initAnalyticsConsent, trackEvent } from '../scripts/analytics.js';
 
   watchCardImages(document.querySelectorAll<HTMLImageElement>('.card-image'));
 
@@ -155,6 +171,7 @@ const categoryIcons = Object.fromEntries(
   // null = no category filter. It is deliberately not a slug, so a category named "All" stays selectable.
   let selectedCategory: string | null = null;
   let selectedBadge = '';
+  let searchReported = false;
 
   function render() {
     const visible = filterAndSortCards(cards, {
@@ -181,6 +198,11 @@ const categoryIcons = Object.fromEntries(
     emptyState.hidden = visible.length > 0;
     grid.hidden = visible.length === 0;
     resetButton.hidden = !search.value && selectedCategory === null && !selectedBadge;
+
+    // Analytics learns only that a search was started, once per search: never the text, never each keystroke.
+    const searching = search.value.trim() !== '';
+    if (searching && !searchReported) trackEvent('search_used');
+    searchReported = searching;
   }
 
   function reset() {
@@ -191,18 +213,20 @@ const categoryIcons = Object.fromEntries(
   }
 
   search.addEventListener('input', render);
-  sort.addEventListener('change', render);
-  allButton.addEventListener('click', () => {
-    selectedCategory = null;
+  sort.addEventListener('change', () => { render(); trackEvent('sort_changed', { sort_by: sort.value }); });
+  // "_all" cannot collide with a category slug (slugs never contain an underscore).
+  const selectCategory = (slug) => {
+    if (slug === selectedCategory) return;
+    selectedCategory = slug;
     render();
-  });
-  categoryButtons.forEach((button) => button.addEventListener('click', () => {
-    selectedCategory = button.dataset.category ?? null;
-    render();
-  }));
+    trackEvent('category_selected', { category: slug ?? '_all' });
+  };
+  allButton.addEventListener('click', () => selectCategory(null));
+  categoryButtons.forEach((button) => button.addEventListener('click', () => selectCategory(button.dataset.category ?? null)));
   badgeButtons.forEach((button) => button.addEventListener('click', () => {
     selectedBadge = selectedBadge === button.dataset.badge ? '' : (button.dataset.badge ?? '');
     render();
+    trackEvent('badge_filter_changed', { badge: button.dataset.badge ?? 'unknown', enabled: selectedBadge === button.dataset.badge ? 'true' : 'false' });
   }));
   resetButton.addEventListener('click', reset);
   document.querySelector<HTMLButtonElement>('#empty-reset')!.addEventListener('click', reset);
@@ -216,5 +240,34 @@ const categoryIcons = Object.fromEntries(
       render();
     }
   });
+  // Outbound clicks. `click` covers mouse, touch and keyboard activation; `auxclick` the middle button, which `click` does not
+  // report. A given gesture raises one of them, never both, so nothing is counted twice.
+  function onActivate(target, handler) {
+    target.addEventListener('click', handler);
+    target.addEventListener('auxclick', (event) => { if (event.button === 1) handler(); });
+  }
+  // A project is opened by its "Visit project" link or by a link inside its description (a live demo, a forum thread). One
+  // delegated listener covers both, so cards added or reordered later need nothing; the card's own GitHub star link and any
+  // other control are not project opens. Only the stable ID and category are reported, never the link's address.
+  const onGrid = (event: Event) => {
+    const link = (event.target as Element | null)?.closest?.('a[href]');
+    const card = link?.closest<HTMLElement>('.project-card');
+    if (!link || !card || !(link.matches('.project-link') || link.closest('.card-description'))) return;
+    trackEvent('project_opened', { project_id: card.dataset.id ?? 'unknown', category: card.dataset.category ?? 'unknown' });
+  };
+  grid.addEventListener('click', onGrid);
+  grid.addEventListener('auxclick', (event) => { if ((event as MouseEvent).button === 1) onGrid(event); });
+  document.querySelectorAll<HTMLAnchorElement>('a[data-support]').forEach((link) => {
+    onActivate(link, () => trackEvent('support_click', { support_type: link.dataset.support ?? 'unknown', placement: link.dataset.placement ?? 'unknown' }));
+  });
   render();
+  // After the first render, so a problem here can never keep the gallery from appearing.
+  initAnalyticsConsent({
+    container: document.querySelector<HTMLElement>('#privacy-footer')!,
+    banner: document.querySelector<HTMLElement>('#consent-banner')!,
+    allow: document.querySelector<HTMLButtonElement>('#consent-allow')!,
+    decline: document.querySelector<HTMLButtonElement>('#consent-decline')!,
+    settings: document.querySelector<HTMLButtonElement>('#privacy-settings')!,
+    status: document.querySelector<HTMLElement>('#privacy-status')!,
+  });
 </script>

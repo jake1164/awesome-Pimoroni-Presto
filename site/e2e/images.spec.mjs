@@ -134,7 +134,7 @@ test('only images are requested from other origins; no scripts, styles, fonts, f
   const { thirdParty } = await open(page);
   expect(thirdParty.length).toBeGreaterThan(0);
   expect(thirdParty.filter((request) => request.type !== 'image')).toEqual([]);
-  // The gallery page has no analytics, tracking or remote scripts of its own.
+  // Analytics only exists on the live origin after opt-in (e2e/analytics.spec.mjs); this site is local, so it has no remote scripts.
   expect(await page.locator('script[src^="http"], link[href^="http"], iframe').count()).toBe(0);
 });
 
