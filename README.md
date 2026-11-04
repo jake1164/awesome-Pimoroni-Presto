@@ -9,6 +9,8 @@
 
 Presto is your new RP2350-powered, connected desktop companion! It features a 4" square touchscreen, elegant black aluminium stand and RGB backlighting. ♥ [Support this list](#support-this-project)
 
+**[View Interactive Gallery](https://jake1164.github.io/awesome-Pimoroni-Presto/)** – search, filter and sort every project in this list.
+
 ## Contents
 
 - [Official Resources](#official-resources)

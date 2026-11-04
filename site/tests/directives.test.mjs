@@ -387,14 +387,16 @@ test('pipeline failure: a cache that cannot be read or replaced fails; a merely 
   } finally {
     await asDirectory.cleanup();
   }
-  // Output location cannot be created: its parent is a regular file.
+  // Output location cannot be created: its parent is a regular file. Both messages are legitimate for this path, and
+  // which one appears depends on the platform: Linux reports ENOTDIR when reading `parent/cache.json`, so the read
+  // fails first ("cannot read"); Windows reports ENOENT, which means "no cache yet", so the write fails ("cannot write").
   const blocked = await scratch(goodCatalog([project('a')]));
   try {
     const parentFile = path.join(blocked.directory, 'parent');
     await writeFile(parentFile, 'x');
     const { code, output } = await runScript({ ...blocked.env, PRESTO_IMAGE_CACHE: path.join(parentFile, 'cache.json'), PRESTO_IMAGE_DISCOVERY: 'off' });
     assert.equal(code, 1, output);
-    assert.match(output, /cannot write the image cache/);
+    assert.match(output, /cannot (read|write) the image cache/);
   } finally {
     await blocked.cleanup();
   }
