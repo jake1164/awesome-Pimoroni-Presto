@@ -1,0 +1,273 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import catalog from '@catalog';
+import imageCache from '@image-cache';
+import starCache from '@star-cache';
+import { imageProps, usableImages } from '../lib/image-discovery.mjs';
+import { starsFor } from '../lib/github-stars.mjs';
+import { base, coffeeUrl, repositoryUrl, sponsorsUrl } from '../../site-config.mjs';
+
+const categories = catalog.categories;
+const root = base.replace(/\/$/, '');
+// Images are discovered at build time from each project's own page (scripts/discover-images.mjs) and cached.
+// Only projects in the current catalog can show one; a project without a result keeps its category icon.
+const discovered = usableImages(imageCache, catalog.projects);
+const allowLoopbackHttp = process.env.PRESTO_IMAGE_ALLOW_LOCAL === '1'; // test fixtures only
+const imageFor = (project) => imageProps(discovered.get(project.id), project, { allowLoopbackHttp });
+const hasImages = catalog.projects.some((project) => imageFor(project));
+// GitHub star counts are read at build time (scripts/fetch-stars.mjs) and cached; the browser never asks GitHub.
+// A project without a known count gets none: the card shows nothing rather than a zero.
+const starsOf = (project) => starsFor(starCache, project);
+const hasStars = catalog.projects.some((project) => starsOf(project));
+// Same default order the client applies for "Name", so the first paint does not reshuffle.
+const projects = [...catalog.projects].sort((a, b) =>
+  a.title.localeCompare(b.title, undefined, { sensitivity: 'base', numeric: true }),
+);
+
+// Icons are chosen from the catalog's own categories; unknown categories use the generic grid icon.
+const categoryIcons = Object.fromEntries(
+  categories.map(({ slug, name }) => {
+    const normalized = `${slug} ${name}`.toLowerCase();
+    let icon = 'grid';
+    if (/game|arcade/.test(normalized)) icon = 'game';
+    else if (/clock|time/.test(normalized)) icon = 'clock';
+    else if (/weather|climate/.test(normalized)) icon = 'weather';
+    else if (/operating|firmware|system/.test(normalized)) icon = 'cpu';
+    else if (/tool|development|code|example/.test(normalized)) icon = 'code';
+    else if (/community|media/.test(normalized)) icon = 'community';
+    else if (/tutorial|guide/.test(normalized)) icon = 'book';
+    else if (/dashboard|display/.test(normalized)) icon = 'display';
+    return [slug, icon];
+  }),
+);
+---
+
+<Layout title="Awesome Presto — Explore what makers are building">
+  <section class="consent-banner" id="consent-banner" aria-labelledby="consent-heading" hidden>
+    <div>
+      <h2 id="consent-heading">Help improve this community project</h2>
+      <p>With your permission, we use Google Analytics to understand how visitors use this project gallery. Google Analytics uses cookies and pseudonymous identifiers and may collect browser and device information. We never send your gallery search text as a custom event. Analytics is optional, and you can change your choice at any time with “Privacy / Analytics settings” at the bottom of the page. Turning it off stops new collection from this page; it does not delete data already sent, and a few events already waiting to be sent may still go out within seconds.</p>
+    </div>
+    <div class="consent-actions">
+      <button class="pill consent-allow" type="button" id="consent-allow">Allow analytics</button>
+      <button class="pill consent-decline" type="button" id="consent-decline">No thanks</button>
+    </div>
+  </section>
+  <main class="panel">
+    <header class="panel-header">
+      <div>
+        <h1>Awesome Presto</h1>
+        <p class="subtitle">Explore what makers are building</p>
+      </div>
+      <a class="star-repo" data-support="star" data-placement="header" href={repositoryUrl} target="_blank" rel="noopener noreferrer">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 2.5 2.9 6.1 6.6.8-4.9 4.6 1.3 6.6-5.9-3.3-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8Z"></path></svg>
+        <span>Star</span><span class="visually-hidden"> Awesome Presto on GitHub</span>
+      </a>
+    </header>
+
+    <label class="search-box">
+      <span class="visually-hidden">Search projects</span>
+      <input id="project-search" type="search" placeholder="Search projects…" autocomplete="off" aria-keyshortcuts="Control+K Meta+K" />
+    </label>
+
+    <div class="filter-bar" role="group" aria-label="Filter projects by category">
+      <button class="pill" type="button" data-all-categories aria-pressed="true">All</button>
+      {categories.map((category) => (
+        <button class="pill" type="button" data-category={category.slug} data-category-label={category.name} aria-pressed="false">{category.name}</button>
+      ))}
+    </div>
+
+    <div class="toolbar">
+      <p class="results" id="results" role="status" aria-live="polite">
+        <span id="result-count">Showing <strong>{projects.length}</strong> projects</span>
+        <span id="active-filters" class="active-filters"></span>
+      </p>
+      <button class="pill badge-filter" type="button" data-badge="NEW" aria-pressed="false">New</button>
+      <button class="pill badge-filter" type="button" data-badge="RECENT" aria-pressed="false">Recent</button>
+      <label class="sort-control">
+        <span>Sort by</span>
+        <select id="sort-projects">
+          <option value="name">Name</option>
+          <option value="category">Category</option>
+          {hasStars && <option value="stars">GitHub stars</option>}
+        </select>
+      </label>
+      <button class="pill reset-button" type="button" id="reset-filters" hidden>Reset</button>
+    </div>
+
+    <ul class="project-grid" id="project-grid" role="list" aria-label="Projects">
+      {projects.map((project) => (
+        <ProjectCard project={project} icon={categoryIcons[project.category_slug] ?? 'grid'} image={imageFor(project)} stars={starsOf(project)} />
+      ))}
+    </ul>
+    <div class="empty-state" id="empty-state" hidden>
+      <h2>No projects found</h2>
+      <p>Try another search or clear your filters to explore the collection.</p>
+      <button type="button" class="pill" id="empty-reset">Clear filters</button>
+    </div>
+    {(hasImages || hasStars) && (
+      <p class="gallery-note">
+        {hasImages && "Preview images are found automatically and loaded directly from each project's own repository or website. They belong to their authors. "}
+        {hasStars && 'Star counts are GitHub repository stars, read when the site is built.'}
+      </p>
+    )}
+
+    <section class="support" id="support" aria-labelledby="support-heading">
+      <h2 id="support-heading">Support this list</h2>
+      <p>Enjoying Awesome Pimoroni Presto? Giving this repository a GitHub star helps other Presto owners discover it. You can also support ongoing curation and maintenance through GitHub Sponsors or Buy Me a Coffee. Support is entirely optional and never affects which projects are listed.</p>
+      <ul class="support-actions" role="list">
+        <li>
+          <a class="support-button" data-support="star" data-placement="footer" href={repositoryUrl} target="_blank" rel="noopener noreferrer">
+            <svg class="icon-star" aria-hidden="true" viewBox="0 0 24 24"><path d="m12 2.5 2.9 6.1 6.6.8-4.9 4.6 1.3 6.6-5.9-3.3-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8Z"></path></svg>
+            Star on GitHub
+          </a>
+        </li>
+        <li>
+          <a class="support-button" data-support="github_sponsors" data-placement="footer" href={sponsorsUrl} target="_blank" rel="noopener noreferrer">
+            <svg class="icon-heart" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 20.5s-8-4.9-8-11a4.5 4.5 0 0 1 8-2.8 4.5 4.5 0 0 1 8 2.8c0 6.1-8 11-8 11Z"></path></svg>
+            GitHub Sponsors
+          </a>
+        </li>
+        <li>
+          <a class="support-button" data-support="buy_me_a_coffee" data-placement="footer" href={coffeeUrl} target="_blank" rel="noopener noreferrer">
+            <svg class="icon-coffee" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 9h13v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6Z"></path><path d="M17 10.5h1a2.5 2.5 0 0 1 0 5h-1.2"></path><path d="M8 3.5V6M12 3.5V6"></path></svg>
+            Buy Me a Coffee
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <footer class="site-footer" id="privacy-footer" hidden>
+      <button class="privacy-settings" type="button" id="privacy-settings">Privacy / Analytics settings</button>
+      <span id="privacy-status" class="privacy-status" role="status" aria-live="polite"></span>
+    </footer>
+  </main>
+</Layout>
+
+<style is:global>
+  .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  .active-filters::before { content: ' · '; }
+  .active-filters:empty::before { content: none; }
+</style>
+
+<script>
+  import { filterAndSortCards, renderResultCount, watchCardImages } from '../scripts/catalog-controls.js';
+  import { initAnalyticsConsent, trackEvent } from '../scripts/analytics.js';
+
+  watchCardImages(document.querySelectorAll<HTMLImageElement>('.card-image'));
+
+  const cards = [...document.querySelectorAll<HTMLElement>('.project-card')];
+  const search = document.querySelector<HTMLInputElement>('#project-search')!;
+  const sort = document.querySelector<HTMLSelectElement>('#sort-projects')!;
+  const grid = document.querySelector<HTMLElement>('#project-grid')!;
+  const count = document.querySelector<HTMLElement>('#result-count')!;
+  const activeFilters = document.querySelector<HTMLElement>('#active-filters')!;
+  const emptyState = document.querySelector<HTMLElement>('#empty-state')!;
+  const resetButton = document.querySelector<HTMLButtonElement>('#reset-filters')!;
+  const allButton = document.querySelector<HTMLButtonElement>('button[data-all-categories]')!;
+  const categoryButtons = [...document.querySelectorAll<HTMLButtonElement>('button[data-category]')];
+  const badgeButtons = [...document.querySelectorAll<HTMLButtonElement>('button[data-badge]')];
+  // null = no category filter. It is deliberately not a slug, so a category named "All" stays selectable.
+  let selectedCategory: string | null = null;
+  let selectedBadge = '';
+  let searchReported = false;
+
+  function render() {
+    const visible = filterAndSortCards(cards, {
+      query: search.value,
+      category: selectedCategory,
+      badge: selectedBadge,
+      sortBy: sort.value,
+    });
+    visible.forEach((card) => grid.append(card));
+    cards.forEach((card) => { card.hidden = !visible.includes(card); });
+
+    allButton.setAttribute('aria-pressed', String(selectedCategory === null));
+    categoryButtons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.category === selectedCategory)));
+    badgeButtons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.badge === selectedBadge)));
+
+    const labels: string[] = [];
+    if (selectedCategory !== null) {
+      labels.push(categoryButtons.find((button) => button.dataset.category === selectedCategory)?.dataset.categoryLabel ?? selectedCategory);
+    }
+    if (selectedBadge) labels.push(selectedBadge === 'NEW' ? 'New' : 'Recent');
+    activeFilters.textContent = labels.join(' · ');
+
+    renderResultCount(count, visible.length);
+    emptyState.hidden = visible.length > 0;
+    grid.hidden = visible.length === 0;
+    resetButton.hidden = !search.value && selectedCategory === null && !selectedBadge;
+
+    // Analytics learns only that a search was started, once per search: never the text, never each keystroke.
+    const searching = search.value.trim() !== '';
+    if (searching && !searchReported) trackEvent('search_used');
+    searchReported = searching;
+  }
+
+  function reset() {
+    search.value = '';
+    selectedCategory = null;
+    selectedBadge = '';
+    render();
+  }
+
+  search.addEventListener('input', render);
+  sort.addEventListener('change', () => { render(); trackEvent('sort_changed', { sort_by: sort.value }); });
+  // "_all" cannot collide with a category slug (slugs never contain an underscore).
+  const selectCategory = (slug) => {
+    if (slug === selectedCategory) return;
+    selectedCategory = slug;
+    render();
+    trackEvent('category_selected', { category: slug ?? '_all' });
+  };
+  allButton.addEventListener('click', () => selectCategory(null));
+  categoryButtons.forEach((button) => button.addEventListener('click', () => selectCategory(button.dataset.category ?? null)));
+  badgeButtons.forEach((button) => button.addEventListener('click', () => {
+    selectedBadge = selectedBadge === button.dataset.badge ? '' : (button.dataset.badge ?? '');
+    render();
+    trackEvent('badge_filter_changed', { badge: button.dataset.badge ?? 'unknown', enabled: selectedBadge === button.dataset.badge ? 'true' : 'false' });
+  }));
+  resetButton.addEventListener('click', reset);
+  document.querySelector<HTMLButtonElement>('#empty-reset')!.addEventListener('click', reset);
+  document.addEventListener('keydown', (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      search.focus();
+      search.select();
+    } else if (event.key === 'Escape' && document.activeElement === search) {
+      search.value = '';
+      render();
+    }
+  });
+  // Outbound clicks. `click` covers mouse, touch and keyboard activation; `auxclick` the middle button, which `click` does not
+  // report. A given gesture raises one of them, never both, so nothing is counted twice.
+  function onActivate(target, handler) {
+    target.addEventListener('click', handler);
+    target.addEventListener('auxclick', (event) => { if (event.button === 1) handler(); });
+  }
+  // A project is opened by its "Visit project" link or by a link inside its description (a live demo, a forum thread). One
+  // delegated listener covers both, so cards added or reordered later need nothing; the card's own GitHub star link and any
+  // other control are not project opens. Only the stable ID and category are reported, never the link's address.
+  const onGrid = (event: Event) => {
+    const link = (event.target as Element | null)?.closest?.('a[href]');
+    const card = link?.closest<HTMLElement>('.project-card');
+    if (!link || !card || !(link.matches('.project-link') || link.closest('.card-description'))) return;
+    trackEvent('project_opened', { project_id: card.dataset.id ?? 'unknown', category: card.dataset.category ?? 'unknown' });
+  };
+  grid.addEventListener('click', onGrid);
+  grid.addEventListener('auxclick', (event) => { if ((event as MouseEvent).button === 1) onGrid(event); });
+  document.querySelectorAll<HTMLAnchorElement>('a[data-support]').forEach((link) => {
+    onActivate(link, () => trackEvent('support_click', { support_type: link.dataset.support ?? 'unknown', placement: link.dataset.placement ?? 'unknown' }));
+  });
+  render();
+  // After the first render, so a problem here can never keep the gallery from appearing.
+  initAnalyticsConsent({
+    container: document.querySelector<HTMLElement>('#privacy-footer')!,
+    banner: document.querySelector<HTMLElement>('#consent-banner')!,
+    allow: document.querySelector<HTMLButtonElement>('#consent-allow')!,
+    decline: document.querySelector<HTMLButtonElement>('#consent-decline')!,
+    settings: document.querySelector<HTMLButtonElement>('#privacy-settings')!,
+    status: document.querySelector<HTMLElement>('#privacy-status')!,
+  });
+</script>

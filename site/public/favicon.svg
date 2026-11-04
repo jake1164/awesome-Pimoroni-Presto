@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Awesome Presto">
+  <rect width="32" height="32" rx="8" fill="#000"/>
+  <rect x="6" y="8" width="20" height="13" rx="2.5" fill="none" stroke="#f4f4f5" stroke-width="2"/>
+  <path d="M12 25h8M16 21v4" fill="none" stroke="#f4f4f5" stroke-width="2" stroke-linecap="round"/>
+</svg>

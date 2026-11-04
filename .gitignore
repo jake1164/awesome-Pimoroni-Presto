@@ -1,0 +1,13 @@
+# Astro gallery build output and dependencies
+/site/node_modules/
+/site/dist/
+/site/**/catalog.json
+/site/test-results/
+/site/.synthetic/
+/site/.cache/
+/site/playwright-report/
+/site/.astro/
+/.ai_docs/
+/AGENTS.md
+__pycache__/
+*.pyc
